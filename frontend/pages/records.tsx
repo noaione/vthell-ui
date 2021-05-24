@@ -13,11 +13,25 @@ import TreeHeader from "../components/TreeHeader";
 import { expandFilteredNodes, filterTree, NodeTree } from "../lib/filter";
 import { humanizeBytes, parseUnix } from "../lib/utils";
 
+function countTotalFilesRecurse(node: NodeTree, cb: (node: NodeTree) => void) {
+    for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        if (child.type === "file") {
+            if (typeof cb === "function") {
+                cb(child);
+            }
+        } else if (child.type === "folder") {
+            countTotalFilesRecurse(child, cb);
+        }
+    }
+}
+
 interface RecordsPageState {
     data: NodeTree;
     originalData: NodeTree;
     size: number;
     lastUpdate: number;
+    totalFiles: number;
     isLoading: boolean;
     searchStr?: string;
     cursor?: NodeTree;
@@ -26,6 +40,23 @@ interface RecordsPageState {
 
 interface RecordsPageProps {
     BACKEND_API?: string;
+}
+
+function DisclaimerSection() {
+    return (
+        <>
+            <p className="mt-2 font-semibold text-lg">Disclaimer</p>
+            <p>
+                This page doesn&apos;t provide any Download link for them, please check here{" "}
+                <a className="text-blue-400 hover:text-blue-500" href="https://vthell.ihateani.me/0:/">
+                    vthell.ihateani.me
+                </a>
+                <br />
+                <code className="text-green-200">Member-Only Stream Archive</code> are protected with password
+                and only available to be seen here and not be downloaded by anyone elses.
+            </p>
+        </>
+    );
 }
 
 async function fetchData(BACKEND_API: string) {
@@ -63,6 +94,7 @@ export default class RecordsPage extends React.Component<RecordsPageProps, Recor
             originalData: data,
             size: -1,
             lastUpdate: -1,
+            totalFiles: -1,
             isLoading: true,
             searchStr: "",
         };
@@ -71,11 +103,15 @@ export default class RecordsPage extends React.Component<RecordsPageProps, Recor
     async componentDidMount() {
         const fetched = await fetchData(this.props.BACKEND_API);
         if (Object.keys(fetched).length > 0) {
+            let finalCount = 0;
+            const cb = () => (finalCount += 1);
+            countTotalFilesRecurse(fetched.data, cb);
             this.setState({
                 data: fetched.data,
                 originalData: fetched.data,
                 size: fetched.size,
                 lastUpdate: fetched.lastUpdate,
+                totalFiles: finalCount,
                 isLoading: false,
             });
         }
@@ -171,27 +207,35 @@ export default class RecordsPage extends React.Component<RecordsPageProps, Recor
                             {!isLoading ? (
                                 <>
                                     <p>
-                                        <span className="font-semibold">Size:</span>{" "}
+                                        <span className="font-semibold">Total Sizes:</span>{" "}
                                         {humanizeBytes(this.state.size)}
+                                    </p>
+                                    <p>
+                                        <span className="font-semibold">Total Files:</span>{" "}
+                                        {this.state.totalFiles.toLocaleString()} files
                                     </p>
                                     <p>
                                         <span className="font-semibold">Last Modified:</span>{" "}
                                         {parseUnix(this.state.lastUpdate)}
                                     </p>
-                                    <p className="mt-2 font-semibold text-lg">Disclaimer</p>
-                                    <p>
-                                        This page doesn&apos;t provide any Download link for them, please
-                                        check here{" "}
-                                        <a
-                                            className="text-blue-400 hover:text-blue-500"
-                                            href="https://vthell.ihateani.me/0:/"
-                                        >
-                                            vthell.ihateani.me
-                                        </a>
-                                    </p>
+                                    <DisclaimerSection />
                                 </>
                             ) : (
-                                <p className="font-semibold animate-pulse">Loading...</p>
+                                <>
+                                    <p>
+                                        <span className="font-semibold">Total Sizes:</span>{" "}
+                                        <span className="animate-pulse">Loading...</span>
+                                    </p>
+                                    <p>
+                                        <span className="font-semibold">Total Files:</span>{" "}
+                                        <span className="animate-pulse">Loading...</span>
+                                    </p>
+                                    <p>
+                                        <span className="font-semibold">Last Modified:</span>{" "}
+                                        <span className="animate-pulse">Loading...</span>
+                                    </p>
+                                    <DisclaimerSection />
+                                </>
                             )}
                         </div>
                     </div>
