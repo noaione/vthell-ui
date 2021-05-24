@@ -23,11 +23,14 @@ interface RecordsPageState {
     active?: boolean;
 }
 
-async function fetchData() {
+interface RecordsPageProps {
+    BACKEND_API?: string;
+}
+
+async function fetchData(BACKEND_API: string) {
     console.info("Fetching records data...");
-    const { NEXT_PUBLIC_BACKEND_API_URL } = process.env;
     try {
-        const response = await axios.get(`${NEXT_PUBLIC_BACKEND_API_URL}/api/records`);
+        const response = await axios.get(`${BACKEND_API}/api/records`);
         const respData = response.data;
         return {
             data: respData.data,
@@ -40,7 +43,7 @@ async function fetchData() {
     }
 }
 
-export default class RecordsPage extends React.Component<{}, RecordsPageState> {
+export default class RecordsPage extends React.Component<RecordsPageProps, RecordsPageState> {
     constructor(props) {
         super(props);
         this.onKeyUpSearch = this.onKeyUpSearch.bind(this);
@@ -65,7 +68,7 @@ export default class RecordsPage extends React.Component<{}, RecordsPageState> {
     }
 
     async componentDidMount() {
-        const fetched = await fetchData();
+        const fetched = await fetchData(this.props.BACKEND_API);
         if (Object.keys(fetched).length > 0) {
             this.setState({
                 data: fetched.data,
@@ -105,8 +108,8 @@ export default class RecordsPage extends React.Component<{}, RecordsPageState> {
 
     render() {
         const { data, cursor, isLoading } = this.state;
-        const { NEXT_PUBLIC_BACKEND_API_URL } = process.env;
-        const URL_BACKEND = new URL(NEXT_PUBLIC_BACKEND_API_URL);
+        const { BACKEND_API } = this.props;
+        const URL_BACKEND = new URL(BACKEND_API);
 
         return (
             <>
@@ -179,3 +182,11 @@ export default class RecordsPage extends React.Component<{}, RecordsPageState> {
         );
     }
 }
+
+export async function getStaticProps() {
+    return {
+        props: {
+            BACKEND_API: process.env.NEXT_PUBLIC_BACKEND_API_URL,
+        }
+    };
+};

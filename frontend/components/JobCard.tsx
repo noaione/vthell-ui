@@ -23,6 +23,7 @@ export interface JobProps {
     type: PlatformType;
     startTimeJS: string;
     onRemoval: (id: string) => void;
+    BACKEND_API: string;
 }
 
 interface JobState {
@@ -52,9 +53,9 @@ export default class JobCard extends React.Component<JobProps, JobState> {
         const bodyFormData = new FormData();
         bodyFormData.append("id", this.props.id);
         bodyFormData.append("passkey", this.state.passBox);
-        const { NEXT_PUBLIC_BACKEND_API_URL } = process.env;
+        const { BACKEND_API } = this.props;
         try {
-            await axios.delete(`${NEXT_PUBLIC_BACKEND_API_URL}/api/jobs`, {
+            await axios.delete(`${BACKEND_API}/api/jobs`, {
                 data: bodyFormData,
                 headers: {
                     "Content-Type": "multipart/form-data",

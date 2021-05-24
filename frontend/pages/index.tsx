@@ -16,7 +16,7 @@ interface JobsDatasetProps {
     data: JobPropsWithoutRemove[];
 }
 
-class JobsDataset extends React.Component<JobsDatasetProps, JobsDatasetProps> {
+class JobsDataset extends React.Component<JobsDatasetProps & {BACKEND_API: string}, JobsDatasetProps> {
     constructor(props) {
         super(props);
         this.dismissData = this.dismissData.bind(this);
@@ -48,11 +48,15 @@ class JobsDataset extends React.Component<JobsDatasetProps, JobsDatasetProps> {
         return (
             <div className="flex flex-col grid-cols-1 gap-10 pb-8">
                 {data.map((job) => (
-                    <JobCard key={`job-${job.id}`} {...job} onRemoval={this.dismissData} />
+                    <JobCard key={`job-${job.id}`} {...job} onRemoval={this.dismissData} BACKEND_API={this.props.BACKEND_API} />
                 ))}
             </div>
         );
     }
+}
+
+interface PageProps {
+    BACKEND_API?: string;
 }
 
 interface PageState {
@@ -61,7 +65,7 @@ interface PageState {
     firstLoad: boolean;
 }
 
-export default class MainHomePage extends React.Component<{}, PageState> {
+export default class MainHomePage extends React.Component<PageProps, PageState> {
     INTERVAL: number;
     intTimer?: NodeJS.Timeout;
     constructor(props) {
@@ -78,9 +82,9 @@ export default class MainHomePage extends React.Component<{}, PageState> {
     async fetchData() {
         this.setState({ ...this.state, loading: true });
         console.info("Fetching new data...");
-        const { NEXT_PUBLIC_BACKEND_API_URL } = process.env;
+        const { BACKEND_API } = this.props;
         try {
-            const response = await axios.get(`${NEXT_PUBLIC_BACKEND_API_URL}/api/jobs`);
+            const response = await axios.get(`${BACKEND_API}/api/jobs`);
             this.setState({ loadedData: response.data.data, loading: false });
         } catch (err) {
             console.error(err);
@@ -135,6 +139,7 @@ export default class MainHomePage extends React.Component<{}, PageState> {
 
     render() {
         const { loading, firstLoad, loadedData } = this.state;
+        const { BACKEND_API } = this.props;
 
         function renderLoadingState() {
             if (loading && firstLoad) {
@@ -148,7 +153,7 @@ export default class MainHomePage extends React.Component<{}, PageState> {
             } else if (loading) {
                 return (
                     <>
-                        <JobsDataset data={loadedData} />
+                        <JobsDataset data={loadedData} BACKEND_API={BACKEND_API} />
                         <BaseContainer>
                             <div className="mt-2 mb-6 text-lg font-bold text-gray-300 animate-pulse">
                                 Refreshing...
@@ -157,11 +162,10 @@ export default class MainHomePage extends React.Component<{}, PageState> {
                     </>
                 );
             }
-            return <JobsDataset data={loadedData} />;
+            return <JobsDataset data={loadedData} BACKEND_API={BACKEND_API} />;
         }
 
-        const { NEXT_PUBLIC_BACKEND_API_URL } = process.env;
-        const URL_BACKEND = new URL(NEXT_PUBLIC_BACKEND_API_URL);
+        const URL_BACKEND = new URL(BACKEND_API);
 
         return (
             <>
@@ -184,3 +188,11 @@ export default class MainHomePage extends React.Component<{}, PageState> {
         );
     }
 }
+
+export async function getStaticProps() {
+    return {
+        props: {
+            BACKEND_API: process.env.NEXT_PUBLIC_BACKEND_API_URL,
+        }
+    };
+};
