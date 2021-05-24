@@ -56,12 +56,12 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
             <header className={"bg-gray-700 " + stickyModel}>
                 <nav className="relative select-none bg-gray-700 lg:flex lg:items-stretch w-full py-3">
                     <div className="w-full relative flex justify-between lg:w-auto pr-4 lg:static lg:block lg:justify-start">
-                        <div className="flex flex-row items-center ml-4">
+                        <a className="group flex flex-row items-center ml-4">
                             <img src="https://p.n4o.xyz/i/cococlock.gif" alt="Coco Okite" className="h-12" />
-                            <span className="font-semibold text-xl tracking-tight ml-2 text-white">
+                            <span className="font-semibold text-xl tracking-tight ml-2 text-white group-hover:opacity-80 transition">
                                 VTHell
                             </span>
-                        </div>
+                        </a>
                         <button
                             onClick={this.toggleDropdown}
                             className="cursor-pointer text-xl leading-none px-3 py-1 border border-solid border-transparent rounded bg-transparent block lg:hidden outline-none focus:outline-none"
@@ -82,7 +82,7 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
                         <div className="lg:flex lg:items-stretch lg:justify-end ml-auto mr-4">
                             <a
                                 href={jobsUrl}
-                                className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75"
+                                className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75 transition"
                                 onClick={(ev) => {
                                     ev.preventDefault();
                                     outerThis.navigateLink(jobsUrl);
@@ -92,7 +92,7 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
                             </a>
                             <a
                                 href={recordedUrl}
-                                className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75"
+                                className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75 transition"
                                 onClick={(ev) => {
                                     ev.preventDefault();
                                     outerThis.navigateLink(recordedUrl);
@@ -102,7 +102,7 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
                             </a>
                             <a
                                 href="https://vthell.ihateani.me"
-                                className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75"
+                                className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75 transition"
                                 rel="noopener noreferrer"
                                 target="_blank"
                             >
