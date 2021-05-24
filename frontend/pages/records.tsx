@@ -6,6 +6,7 @@ import { decorators, theme, Treebeard, TreeNode } from "react-treebeard-ts";
 import SearchIcon from "@heroicons/react/outline/SearchIcon";
 
 import MetadataHead from "../components/MetadataHead";
+import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import NodeViewer from "../components/NodeViewer";
 import TreeHeader from "../components/TreeHeader";
@@ -240,6 +241,7 @@ export default class RecordsPage extends React.Component<RecordsPageProps, Recor
                         </div>
                     </div>
                 </main>
+                <Footer />
             </>
         );
     }
