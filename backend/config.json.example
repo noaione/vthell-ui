@@ -1,0 +1,9 @@
+{
+    "vthell": {
+        "path": "/path/to/vthell",
+        "rclone_path": "rclone",
+        "gdrive_path": "drive:VTuberHell"
+    },
+    "secret": "pleasechangethis",
+    "ytapi_key": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+}
