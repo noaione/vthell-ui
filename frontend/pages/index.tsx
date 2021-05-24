@@ -9,6 +9,7 @@ import Footer from "../components/Footer";
 import JobCard, { JobProps } from "../components/JobCard";
 import Navbar from "../components/Navbar";
 import JobCardSkeleton from "../components/JobCardSkeleton";
+import MetadataHead from "../components/MetadataHead";
 
 type JobPropsWithoutRemove = Omit<JobProps, "onRemoval">;
 
@@ -16,7 +17,7 @@ interface JobsDatasetProps {
     data: JobPropsWithoutRemove[];
 }
 
-class JobsDataset extends React.Component<JobsDatasetProps & {BACKEND_API: string}, JobsDatasetProps> {
+class JobsDataset extends React.Component<JobsDatasetProps & { BACKEND_API: string }, JobsDatasetProps> {
     constructor(props) {
         super(props);
         this.dismissData = this.dismissData.bind(this);
@@ -48,7 +49,12 @@ class JobsDataset extends React.Component<JobsDatasetProps & {BACKEND_API: strin
         return (
             <div className="flex flex-col grid-cols-1 gap-10 pb-8">
                 {data.map((job) => (
-                    <JobCard key={`job-${job.id}`} {...job} onRemoval={this.dismissData} BACKEND_API={this.props.BACKEND_API} />
+                    <JobCard
+                        key={`job-${job.id}`}
+                        {...job}
+                        onRemoval={this.dismissData}
+                        BACKEND_API={this.props.BACKEND_API}
+                    />
                 ))}
             </div>
         );
@@ -165,14 +171,13 @@ export default class MainHomePage extends React.Component<PageProps, PageState> 
             return <JobsDataset data={loadedData} BACKEND_API={BACKEND_API} />;
         }
 
-        const URL_BACKEND = new URL(BACKEND_API);
-
         return (
             <>
                 <Head>
+                    <MetadataHead.Base />
                     <title>Jobs :: VTHell WebUI</title>
-                    <link rel="preconnect" href={URL_BACKEND.origin} />
-                    <link rel="preconnect" href="https://i.ytimg.com" />
+                    <MetadataHead.SEO />
+                    <MetadataHead.Prefetch BACKEND_API={BACKEND_API} />
                 </Head>
                 <Navbar />
                 <main className="antialiased h-full pb-4">
@@ -193,6 +198,6 @@ export async function getStaticProps() {
     return {
         props: {
             BACKEND_API: process.env.NEXT_PUBLIC_BACKEND_API_URL,
-        }
+        },
     };
-};
+}

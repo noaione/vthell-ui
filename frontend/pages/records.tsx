@@ -5,6 +5,7 @@ import axios from "axios";
 import { decorators, Treebeard, TreeNode } from "react-treebeard-ts";
 import SearchIcon from "@heroicons/react/outline/SearchIcon";
 
+import MetadataHead from "../components/MetadataHead";
 import Navbar from "../components/Navbar";
 import NodeViewer from "../components/NodeViewer";
 import TreeHeader from "../components/TreeHeader";
@@ -109,14 +110,18 @@ export default class RecordsPage extends React.Component<RecordsPageProps, Recor
     render() {
         const { data, cursor, isLoading } = this.state;
         const { BACKEND_API } = this.props;
-        const URL_BACKEND = new URL(BACKEND_API);
 
         return (
             <>
                 <Head>
+                    <MetadataHead.Base />
                     <title>Records :: VTHell WebUI</title>
-                    <link rel="preconnect" href={URL_BACKEND.origin} />
-                    <link rel="preconnect" href="https://i.ytimg.com" />
+                    <MetadataHead.SEO
+                        title="Records"
+                        urlPath="/records"
+                        description="All recorded past stream listing that are powered by VTHell"
+                    />
+                    <MetadataHead.Prefetch BACKEND_API={BACKEND_API} />
                 </Head>
                 <Navbar mode="records" />
                 <main>
@@ -187,6 +192,6 @@ export async function getStaticProps() {
     return {
         props: {
             BACKEND_API: process.env.NEXT_PUBLIC_BACKEND_API_URL,
-        }
+        },
     };
-};
+}
