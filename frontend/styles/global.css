@@ -1,0 +1,51 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+
+@import "tailwindcss/utilities";
+
+body {
+    @apply bg-gray-800;
+    @apply text-white;
+}
+
+.nice-shadow {
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+}
+
+.modal-base {
+    @apply top-2/4 left-2/4 right-auto bottom-auto;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+}
+
+.-mr-2\/4  {
+    margin-right: -50%;
+}
+
+::-webkit-scrollbar {
+    width: 0;
+    @apply bg-transparent;
+}
+
+.treeboard-main > ul {
+    @apply bg-gray-800;
+}
+
+/* fade-transition */
+.fade-transition-enter {
+    @apply opacity-0;
+}
+
+.fade-transition-enter-active {
+    @apply opacity-100;
+    @apply transition-opacity duration-300 ease-in;
+}
+
+.fade-transition-exit {
+    @apply opacity-100;
+}
+
+.fade-transition-exit-active {
+    @apply opacity-0;
+    @apply transition-opacity duration-200 ease-out;
+}
