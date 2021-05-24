@@ -2,7 +2,7 @@ import React from "react";
 import Head from "next/head";
 
 import axios from "axios";
-import { decorators, Treebeard, TreeNode } from "react-treebeard-ts";
+import { decorators, theme, Treebeard, TreeNode } from "react-treebeard-ts";
 import SearchIcon from "@heroicons/react/outline/SearchIcon";
 
 import MetadataHead from "../components/MetadataHead";
@@ -111,6 +111,13 @@ export default class RecordsPage extends React.Component<RecordsPageProps, Recor
         const { data, cursor, isLoading } = this.state;
         const { BACKEND_API } = this.props;
 
+        const {
+            tree: { node, base },
+        } = theme;
+        const NodeBase = node;
+        const NodeBaseBase = base;
+        NodeBaseBase.backgroundColor = "#262626";
+
         return (
             <>
                 <Head>
@@ -148,6 +155,12 @@ export default class RecordsPage extends React.Component<RecordsPageProps, Recor
                                 data={data as TreeNode}
                                 onToggle={this.onToggled}
                                 decorators={{ ...decorators, Header: TreeHeader }}
+                                style={{
+                                    tree: {
+                                        node: { ...NodeBase, activeLink: { background: "#353535" } },
+                                        base: NodeBaseBase,
+                                    },
+                                }}
                             />
                         )}
                     </div>

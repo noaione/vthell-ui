@@ -27,10 +27,6 @@ body {
     @apply bg-transparent;
 }
 
-.treeboard-main > ul {
-    @apply bg-gray-800;
-}
-
 /* fade-transition */
 .fade-transition-enter {
     @apply opacity-0;
