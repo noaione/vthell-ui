@@ -361,7 +361,7 @@ export default class CreateNewJobsPages extends React.Component<PageProps, PageS
                                 onClick={() => this.determineChannelPreview(this.state.newUrl)}
                                 className="w-full"
                             >
-                                Validate
+                                Preview
                             </Buttons>
                             <Buttons
                                 btnType="success"
