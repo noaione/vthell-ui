@@ -4,7 +4,7 @@ import Router from "next/router";
 import PlusIcon from "@heroicons/react/solid/PlusIcon";
 
 interface NavbarProps {
-    mode?: "home" | "records" | "create";
+    mode?: "home" | "records" | "create" | "error";
     noSticky?: boolean;
 }
 
@@ -48,6 +48,10 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
         } else if (mode === "create") {
             jobsUrl = "/";
             recordedUrl = "/records";
+        } else if (mode === "error") {
+            jobsUrl = "/";
+            recordedUrl = "/records";
+            createUrl = "/new";
         } else {
             recordedUrl = "/records";
             createUrl = "/new";
