@@ -46,14 +46,14 @@ class Buttons extends React.Component<ButtonsProps> {
 
         const colorMapping = {
             primary: "bg-blue-500 hover:bg-blue-600",
-            success: "bg-green-500 hover:bg-blue-600",
+            success: "bg-green-600 hover:bg-green-700",
             warning: "bg-yellow-600 hover:bg-yellow-700",
             danger: "bg-red-500 hover:bg-red-600",
             dark: "bg-gray-700 hover:bg-gray-800",
         };
         const colorDisabledMapping = {
             primary: "bg-blue-400",
-            success: "bg-green-400",
+            success: "bg-green-500",
             warning: "bg-yellow-500",
             danger: "bg-red-400",
             dark: "bg-gray-600",
@@ -67,13 +67,13 @@ class Buttons extends React.Component<ButtonsProps> {
         let colored = colorMapping[realType] || colorMapping.primary;
         if (props.disabled) {
             colored = colorDisabledMapping[realType] || colorDisabledMapping.primary;
-            colored += " cursor-not-allowed";
+            colored += " cursor-not-allowed opacity-80";
         }
 
         const targetData = isOutsideLink(props.href) ? "_blank" : null;
         const rel = targetData === "_blank" ? "noopener noreferrer" : null;
         if (use === "a") {
-            const restProps = (props as unknown) as React.AnchorHTMLAttributes<HTMLAnchorElement>;
+            const restProps = props as unknown as React.AnchorHTMLAttributes<HTMLAnchorElement>;
             return (
                 <a
                     {...restProps}
@@ -90,7 +90,7 @@ class Buttons extends React.Component<ButtonsProps> {
             );
         }
 
-        const restProps = (props as unknown) as React.ButtonHTMLAttributes<HTMLButtonElement>;
+        const restProps = props as unknown as React.ButtonHTMLAttributes<HTMLButtonElement>;
         return (
             <button
                 {...restProps}
