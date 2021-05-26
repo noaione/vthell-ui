@@ -37,6 +37,8 @@ interface RecordsPageState {
     searchStr?: string;
     cursor?: NodeTree;
     active?: boolean;
+
+    borderCol?: string;
 }
 
 interface RecordsPageProps {
@@ -114,6 +116,7 @@ export default class RecordsPage extends React.Component<RecordsPageProps, Recor
                 lastUpdate: fetched.lastUpdate,
                 totalFiles: finalCount,
                 isLoading: false,
+                borderCol: "border-gray-500",
             });
         }
     }
@@ -145,7 +148,7 @@ export default class RecordsPage extends React.Component<RecordsPageProps, Recor
     }
 
     render() {
-        const { data, cursor, isLoading } = this.state;
+        const { data, cursor, isLoading, borderCol } = this.state;
         const { BACKEND_API } = this.props;
 
         const {
@@ -170,13 +173,18 @@ export default class RecordsPage extends React.Component<RecordsPageProps, Recor
                 <Navbar mode="records" />
                 <main>
                     <div className="pt-5 pr-5 pb-0 pl-5">
-                        <label className="flex flex-row gap-0">
-                            <span className="bg-gray-600 border border-r-0 border-gray-500 p-3 items-center">
-                                <SearchIcon className=" w-6 h-6 items-center " />
+                        <label className="flex flex-row gap-0 group">
+                            <span className={`bg-gray-600 border border-r-0 ${borderCol} p-3 items-center`}>
+                                <SearchIcon
+                                    className="w-6 h-6 items-center"
+                                    style={{ color: borderCol === "border-gray-500" ? undefined : "#929292" }}
+                                />
                             </span>
                             <input
                                 className="form-input w-screen py-3 bg-gray-700 text-white"
                                 placeholder="Search for..."
+                                onFocus={() => this.setState({ borderCol: "border-blue-600 shadow-helper" })}
+                                onBlur={() => this.setState({ borderCol: "border-gray-500" })}
                                 type="text"
                                 onChange={this.onKeyUpSearch}
                             />
