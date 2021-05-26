@@ -10,6 +10,7 @@ import JobCard, { JobProps } from "../components/JobCard";
 import Navbar from "../components/Navbar";
 import JobCardSkeleton from "../components/JobCardSkeleton";
 import MetadataHead from "../components/MetadataHead";
+import ToastNotification, { ToastCallbacks, ToastType } from "../components/ToastNotification";
 
 type JobPropsWithoutRemove = Omit<JobProps, "onRemoval">;
 
@@ -17,7 +18,14 @@ interface JobsDatasetProps {
     data: JobPropsWithoutRemove[];
 }
 
-class JobsDataset extends React.Component<JobsDatasetProps & { BACKEND_API: string }, JobsDatasetProps> {
+interface CallToastProps {
+    callToast: (text: string, mode: ToastType) => void;
+}
+
+class JobsDataset extends React.Component<
+    JobsDatasetProps & { BACKEND_API: string } & CallToastProps,
+    JobsDatasetProps
+> {
     constructor(props) {
         super(props);
         this.dismissData = this.dismissData.bind(this);
@@ -53,6 +61,7 @@ class JobsDataset extends React.Component<JobsDatasetProps & { BACKEND_API: stri
                         key={`job-${job.id}`}
                         {...job}
                         onRemoval={this.dismissData}
+                        callToast={this.props.callToast}
                         BACKEND_API={this.props.BACKEND_API}
                     />
                 ))}
@@ -74,10 +83,13 @@ interface PageState {
 export default class MainHomePage extends React.Component<PageProps, PageState> {
     INTERVAL: number;
     intTimer?: NodeJS.Timeout;
+    toastCb?: ToastCallbacks;
+
     constructor(props) {
         super(props);
         this.INTERVAL = 60 * 1000;
         this.fetchData = this.fetchData.bind(this);
+        this.callToast = this.callToast.bind(this);
         this.state = {
             loading: true,
             loadedData: [],
@@ -137,6 +149,12 @@ export default class MainHomePage extends React.Component<PageProps, PageState> 
             });
     }
 
+    callToast(text: string, mode: ToastType = "default") {
+        if (this.toastCb) {
+            this.toastCb.showToast(text, mode);
+        }
+    }
+
     componentWillUnmount() {
         if (this.intTimer) {
             clearInterval(this.intTimer);
@@ -146,6 +164,8 @@ export default class MainHomePage extends React.Component<PageProps, PageState> 
     render() {
         const { loading, firstLoad, loadedData } = this.state;
         const { BACKEND_API } = this.props;
+
+        const self = this;
 
         function renderLoadingState() {
             if (loading && firstLoad) {
@@ -159,7 +179,7 @@ export default class MainHomePage extends React.Component<PageProps, PageState> 
             } else if (loading) {
                 return (
                     <>
-                        <JobsDataset data={loadedData} BACKEND_API={BACKEND_API} />
+                        <JobsDataset data={loadedData} BACKEND_API={BACKEND_API} callToast={self.callToast} />
                         <BaseContainer>
                             <div className="mt-2 mb-6 text-lg font-bold text-gray-300 animate-pulse">
                                 Refreshing...
@@ -168,7 +188,7 @@ export default class MainHomePage extends React.Component<PageProps, PageState> 
                     </>
                 );
             }
-            return <JobsDataset data={loadedData} BACKEND_API={BACKEND_API} />;
+            return <JobsDataset data={loadedData} BACKEND_API={BACKEND_API} callToast={self.callToast} />;
         }
 
         return (
@@ -180,6 +200,7 @@ export default class MainHomePage extends React.Component<PageProps, PageState> 
                     <MetadataHead.Prefetch BACKEND_API={BACKEND_API} />
                 </Head>
                 <Navbar />
+                <ToastNotification onMounted={(cb) => (this.toastCb = cb)} />
                 <main className="antialiased h-full pb-4">
                     <BaseContainer className="flex flex-col gap-4 mt-8 mb-6">
                         <span className="text-2xl font-bold mx-2">Jobs</span>

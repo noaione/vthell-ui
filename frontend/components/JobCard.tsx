@@ -1,10 +1,12 @@
 import React from "react";
 
 import axios from "axios";
-import BaseContainer from "./BaseContainer";
-import EmbeddableVideo, { PlatformType } from "./EmbeddableVideo";
-import Buttons from "./Buttons";
 import { Dialog, Transition } from "@headlessui/react";
+
+import BaseContainer from "./BaseContainer";
+import Buttons from "./Buttons";
+import EmbeddableVideo, { PlatformType } from "./EmbeddableVideo";
+import { ToastType } from "./ToastNotification";
 
 interface StatsJobProps {
     member?: boolean;
@@ -23,6 +25,7 @@ export interface JobProps {
     type: PlatformType;
     startTimeJS: string;
     onRemoval: (id: string) => void;
+    callToast: (text: string, mode: ToastType) => void;
     BACKEND_API: string;
 }
 
@@ -30,6 +33,7 @@ interface JobState {
     isDeleting: boolean;
     deleteModal: boolean;
     passBox: string;
+    reloadable: boolean;
 
     errorModal: boolean;
     errorText: string;
@@ -42,12 +46,15 @@ export default class JobCard extends React.Component<JobProps, JobState> {
     constructor(props) {
         super(props);
         this.deleteSelf = this.deleteSelf.bind(this);
+        this.reloadVideo = this.reloadVideo.bind(this);
+
         this.state = {
             isDeleting: false,
             deleteModal: false,
             passBox: "",
             errorModal: false,
             errorText: "Unknown error",
+            reloadable: this.props.stats.paused,
 
             disableDelete: false,
             disableReload: false,
@@ -85,6 +92,37 @@ export default class JobCard extends React.Component<JobProps, JobState> {
             } else {
                 setTimeout(() => {
                     this.setState({ errorModal: true, errorText: err.toString(), disableDelete: false });
+                }, 200);
+            }
+        }
+    }
+
+    async reloadVideo() {
+        if (this.state.disableReload) {
+            return;
+        }
+        this.setState({ disableReload: true });
+        const { callToast, url } = this.props;
+        const bodyFormData = new FormData();
+        bodyFormData.append("url", url);
+        const { BACKEND_API } = this.props;
+        try {
+            await axios.put(`${BACKEND_API}/api/jobs`, bodyFormData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            callToast(`Job ${url} reloaded!`, "info");
+            this.setState({ disableReload: false, reloadable: false });
+        } catch (err) {
+            if (err.response) {
+                const data = err.response.data;
+                setTimeout(() => {
+                    this.setState({ errorModal: true, errorText: data.message, disableReload: false });
+                }, 200);
+            } else {
+                setTimeout(() => {
+                    this.setState({ errorModal: true, errorText: err.toString(), disableReload: false });
                 }, 200);
             }
         }
@@ -149,11 +187,11 @@ export default class JobCard extends React.Component<JobProps, JobState> {
                         >
                             Delete
                         </Buttons>
-                        {stats.paused && (
+                        {this.state.reloadable && (
                             <Buttons
                                 btnType="warning"
                                 className="mx-1"
-                                onClick={() => this.setState({ deleteModal: true })}
+                                onClick={this.reloadVideo}
                                 disabled={this.state.disableReload}
                             >
                                 Reload
