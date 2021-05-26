@@ -18,11 +18,12 @@ interface JobsDatasetProps {
     data: JobPropsWithoutRemove[];
 }
 
-interface CallToastProps {
+interface CallbackPropsDataset {
     callToast: (text: string, mode: ToastType) => void;
+    onDismiss: (id: string) => void;
 }
 
-class JobsDataset extends React.Component<JobsDatasetProps & CallToastProps, JobsDatasetProps> {
+class JobsDataset extends React.Component<JobsDatasetProps & CallbackPropsDataset, JobsDatasetProps> {
     constructor(props) {
         super(props);
         this.dismissData = this.dismissData.bind(this);
@@ -42,6 +43,7 @@ class JobsDataset extends React.Component<JobsDatasetProps & CallToastProps, Job
         let { data } = this.state;
         data = data.filter((e) => e.id !== id);
         this.setState({ data });
+        this.props.onDismiss(id);
     }
 
     render() {
@@ -69,6 +71,7 @@ class JobsDataset extends React.Component<JobsDatasetProps & CallToastProps, Job
 interface PageState {
     loading: boolean;
     loadedData: JobPropsWithoutRemove[];
+    backupData: JobPropsWithoutRemove[];
     firstLoad: boolean;
 }
 
@@ -82,9 +85,11 @@ export default class MainHomePage extends React.Component<{}, PageState> {
         this.INTERVAL = 60 * 1000;
         this.fetchData = this.fetchData.bind(this);
         this.callToast = this.callToast.bind(this);
+        this.onDimissal = this.onDimissal.bind(this);
         this.state = {
             loading: true,
             loadedData: [],
+            backupData: [],
             firstLoad: true,
         };
     }
@@ -94,7 +99,7 @@ export default class MainHomePage extends React.Component<{}, PageState> {
         console.info("Fetching new data...");
         try {
             const response = await axios.get(`/api/jobs`);
-            this.setState({ loadedData: response.data.data, loading: false });
+            this.setState({ loadedData: response.data.data, backupData: response.data.data, loading: false });
         } catch (err) {
             console.error(err);
             this.setState({ ...this.state, loading: false });
@@ -146,6 +151,12 @@ export default class MainHomePage extends React.Component<{}, PageState> {
         }
     }
 
+    onDimissal(id: string) {
+        let { backupData } = this.state;
+        backupData = backupData.filter((e) => e.id !== id);
+        this.setState({ backupData });
+    }
+
     componentWillUnmount() {
         if (this.intTimer) {
             clearInterval(this.intTimer);
@@ -153,34 +164,7 @@ export default class MainHomePage extends React.Component<{}, PageState> {
     }
 
     render() {
-        const { loading, firstLoad, loadedData } = this.state;
-
-        const self = this;
-
-        function renderLoadingState() {
-            if (loading && firstLoad) {
-                // replace with skeleton
-                return (
-                    <div className="flex flex-col grid-cols-1 gap-10 pb-8">
-                        <JobCardSkeleton />
-                        <JobCardSkeleton />
-                    </div>
-                );
-            } else if (loading) {
-                return (
-                    <>
-                        <JobsDataset data={loadedData} callToast={self.callToast} />
-                        <BaseContainer removeShadow>
-                            <div className="-mt-2 mx-2 mb-6 text-lg font-bold text-gray-300 animate-pulse">
-                                Refreshing...
-                            </div>
-                        </BaseContainer>
-                    </>
-                );
-            }
-
-            return <JobsDataset data={loadedData} callToast={self.callToast} />;
-        }
+        const { loading, firstLoad, loadedData, backupData } = this.state;
 
         return (
             <>
@@ -197,7 +181,27 @@ export default class MainHomePage extends React.Component<{}, PageState> {
                         <span className="text-2xl font-bold mx-2">Jobs</span>
                         <hr className="opacity-60 mx-2" />
                     </BaseContainer>
-                    {renderLoadingState()}
+                    {loading && firstLoad ? (
+                        <div className="flex flex-col grid-cols-1 gap-10 pb-8">
+                            <JobCardSkeleton />
+                            <JobCardSkeleton />
+                        </div>
+                    ) : (
+                        <>
+                            <JobsDataset
+                                data={loading ? backupData : loadedData}
+                                callToast={this.callToast}
+                                onDismiss={this.onDimissal}
+                            />
+                            {loading && (
+                                <BaseContainer removeShadow>
+                                    <div className="-mt-2 mx-2 mb-6 text-lg font-bold text-gray-300 animate-pulse">
+                                        Refreshing...
+                                    </div>
+                                </BaseContainer>
+                            )}
+                        </>
+                    )}
                     <Footer />
                 </main>
                 <BackToTop startAt={100} />
