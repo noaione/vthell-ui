@@ -13,7 +13,7 @@ export default function BaseContainer(
     }
 
     return (
-        <div {...extracted} className={`md:w-2/3 m-auto shadow-md rounded-lg ${extraClass}`}>
+        <div {...extracted} className={`w-full m-auto md:w-2/3 shadow-md rounded-lg ${extraClass}`}>
             {children}
         </div>
     );

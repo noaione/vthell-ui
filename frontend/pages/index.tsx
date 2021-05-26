@@ -182,8 +182,8 @@ export default class MainHomePage extends React.Component<PageProps, PageState> 
                 <Navbar />
                 <main className="antialiased h-full pb-4">
                     <BaseContainer className="flex flex-col gap-4 mt-8 mb-6">
-                        <span className="text-2xl font-bold">Jobs</span>
-                        <hr className="opacity-60" />
+                        <span className="text-2xl font-bold mx-2">Jobs</span>
+                        <hr className="opacity-60 mx-2" />
                     </BaseContainer>
                     {renderLoadingState()}
                     <Footer />

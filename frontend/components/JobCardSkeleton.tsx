@@ -6,7 +6,7 @@ import BaseContainer from "./BaseContainer";
 export default function JobCardSkeleton() {
     return (
         <SkeletonTheme color="#171717" highlightColor="#262626">
-            <div className="flex">
+            <div className="flex mx-2">
                 <BaseContainer>
                     <div className="relative">
                         <div className="aspect-w-16 aspect-h-9">
