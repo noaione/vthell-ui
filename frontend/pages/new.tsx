@@ -138,10 +138,6 @@ class ErrorModal extends React.Component<ModalProps, ModalState> {
     }
 }
 
-interface PageProps {
-    BACKEND_API?: string;
-}
-
 interface PageState {
     isSubmitting: boolean;
     isValid: boolean;
@@ -162,7 +158,7 @@ function extractChannelID(channelUrl: string, regex: RegExp) {
     }
 }
 
-export default class CreateNewJobsPages extends React.Component<PageProps, PageState> {
+export default class CreateNewJobsPages extends React.Component<{}, PageState> {
     errModalCb?: Callbacks;
     toastCb?: ToastCallbacks;
 
@@ -216,21 +212,21 @@ export default class CreateNewJobsPages extends React.Component<PageProps, PageS
     }
 
     async submitNewJobs() {
-        const { BACKEND_API } = this.props;
         const { newUrl, password } = this.state;
         if (this.state.isSubmitting) {
             return;
         }
         this.setState({ isSubmitting: true });
 
-        const bodyFormData = new FormData();
-        bodyFormData.append("url", newUrl);
-        bodyFormData.append("passkey", password);
+        const bodyFormData = {
+            url: newUrl,
+            passkey: password,
+        };
 
         try {
-            const resp = await axios.post(`${BACKEND_API}/api/jobs`, bodyFormData, {
+            const resp = await axios.post(`/api/jobs`, JSON.stringify(bodyFormData), {
                 headers: {
-                    "Content-Type": "multipart/form-data",
+                    "Content-Type": "application/json",
                 },
                 responseType: "json",
             });
@@ -320,7 +316,7 @@ export default class CreateNewJobsPages extends React.Component<PageProps, PageS
                         description="Create a new jobs to be recorded later"
                         urlPath="/new"
                     />
-                    <MetadataHead.Prefetch BACKEND_API={this.props.BACKEND_API} />
+                    <MetadataHead.Prefetch />
                 </Head>
                 <Navbar mode="create" />
                 <ToastNotification onMounted={(cb) => (this.toastCb = cb)} />
@@ -388,12 +384,4 @@ export default class CreateNewJobsPages extends React.Component<PageProps, PageS
             </>
         );
     }
-}
-
-export async function getStaticProps() {
-    return {
-        props: {
-            BACKEND_API: process.env.NEXT_PUBLIC_BACKEND_API_URL,
-        },
-    };
 }

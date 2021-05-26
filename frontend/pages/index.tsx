@@ -22,10 +22,7 @@ interface CallToastProps {
     callToast: (text: string, mode: ToastType) => void;
 }
 
-class JobsDataset extends React.Component<
-    JobsDatasetProps & { BACKEND_API: string } & CallToastProps,
-    JobsDatasetProps
-> {
+class JobsDataset extends React.Component<JobsDatasetProps & CallToastProps, JobsDatasetProps> {
     constructor(props) {
         super(props);
         this.dismissData = this.dismissData.bind(this);
@@ -62,16 +59,11 @@ class JobsDataset extends React.Component<
                         {...job}
                         onRemoval={this.dismissData}
                         callToast={this.props.callToast}
-                        BACKEND_API={this.props.BACKEND_API}
                     />
                 ))}
             </div>
         );
     }
-}
-
-interface PageProps {
-    BACKEND_API?: string;
 }
 
 interface PageState {
@@ -80,7 +72,7 @@ interface PageState {
     firstLoad: boolean;
 }
 
-export default class MainHomePage extends React.Component<PageProps, PageState> {
+export default class MainHomePage extends React.Component<{}, PageState> {
     INTERVAL: number;
     intTimer?: NodeJS.Timeout;
     toastCb?: ToastCallbacks;
@@ -100,9 +92,8 @@ export default class MainHomePage extends React.Component<PageProps, PageState> 
     async fetchData() {
         this.setState({ ...this.state, loading: true });
         console.info("Fetching new data...");
-        const { BACKEND_API } = this.props;
         try {
-            const response = await axios.get(`${BACKEND_API}/api/jobs`);
+            const response = await axios.get(`/api/jobs`);
             this.setState({ loadedData: response.data.data, loading: false });
         } catch (err) {
             console.error(err);
@@ -163,7 +154,6 @@ export default class MainHomePage extends React.Component<PageProps, PageState> 
 
     render() {
         const { loading, firstLoad, loadedData } = this.state;
-        const { BACKEND_API } = this.props;
 
         const self = this;
 
@@ -179,16 +169,17 @@ export default class MainHomePage extends React.Component<PageProps, PageState> 
             } else if (loading) {
                 return (
                     <>
-                        <JobsDataset data={loadedData} BACKEND_API={BACKEND_API} callToast={self.callToast} />
-                        <BaseContainer>
-                            <div className="mt-2 mb-6 text-lg font-bold text-gray-300 animate-pulse">
+                        <JobsDataset data={loadedData} callToast={self.callToast} />
+                        <BaseContainer removeShadow>
+                            <div className="-mt-2 mx-2 mb-6 text-lg font-bold text-gray-300 animate-pulse">
                                 Refreshing...
                             </div>
                         </BaseContainer>
                     </>
                 );
             }
-            return <JobsDataset data={loadedData} BACKEND_API={BACKEND_API} callToast={self.callToast} />;
+
+            return <JobsDataset data={loadedData} callToast={self.callToast} />;
         }
 
         return (
@@ -197,7 +188,7 @@ export default class MainHomePage extends React.Component<PageProps, PageState> 
                     <MetadataHead.Base />
                     <title>Jobs :: VTHell WebUI</title>
                     <MetadataHead.SEO />
-                    <MetadataHead.Prefetch BACKEND_API={BACKEND_API} />
+                    <MetadataHead.Prefetch />
                 </Head>
                 <Navbar />
                 <ToastNotification onMounted={(cb) => (this.toastCb = cb)} />
@@ -213,12 +204,4 @@ export default class MainHomePage extends React.Component<PageProps, PageState> 
             </>
         );
     }
-}
-
-export async function getStaticProps() {
-    return {
-        props: {
-            BACKEND_API: process.env.NEXT_PUBLIC_BACKEND_API_URL,
-        },
-    };
 }

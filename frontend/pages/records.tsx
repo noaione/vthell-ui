@@ -41,10 +41,6 @@ interface RecordsPageState {
     borderCol?: string;
 }
 
-interface RecordsPageProps {
-    BACKEND_API?: string;
-}
-
 function DisclaimerSection() {
     return (
         <>
@@ -62,10 +58,10 @@ function DisclaimerSection() {
     );
 }
 
-async function fetchData(BACKEND_API: string) {
+async function fetchData() {
     console.info("Fetching records data...");
     try {
-        const response = await axios.get(`${BACKEND_API}/api/records`);
+        const response = await axios.get(`/api/records`);
         const respData = response.data;
         return {
             data: respData.data,
@@ -78,7 +74,7 @@ async function fetchData(BACKEND_API: string) {
     }
 }
 
-export default class RecordsPage extends React.Component<RecordsPageProps, RecordsPageState> {
+export default class RecordsPage extends React.Component<{}, RecordsPageState> {
     constructor(props) {
         super(props);
         this.onKeyUpSearch = this.onKeyUpSearch.bind(this);
@@ -100,11 +96,12 @@ export default class RecordsPage extends React.Component<RecordsPageProps, Recor
             totalFiles: -1,
             isLoading: true,
             searchStr: "",
+            borderCol: "border-gray-500",
         };
     }
 
     async componentDidMount() {
-        const fetched = await fetchData(this.props.BACKEND_API);
+        const fetched = await fetchData();
         if (Object.keys(fetched).length > 0) {
             let finalCount = 0;
             const cb = () => (finalCount += 1);
@@ -149,7 +146,6 @@ export default class RecordsPage extends React.Component<RecordsPageProps, Recor
 
     render() {
         const { data, cursor, isLoading, borderCol } = this.state;
-        const { BACKEND_API } = this.props;
 
         const {
             tree: { node, base },
@@ -168,7 +164,7 @@ export default class RecordsPage extends React.Component<RecordsPageProps, Recor
                         urlPath="/records"
                         description="All recorded past stream listing that are powered by VTHell"
                     />
-                    <MetadataHead.Prefetch BACKEND_API={BACKEND_API} />
+                    <MetadataHead.Prefetch />
                 </Head>
                 <Navbar mode="records" />
                 <main>
@@ -253,12 +249,4 @@ export default class RecordsPage extends React.Component<RecordsPageProps, Recor
             </>
         );
     }
-}
-
-export async function getStaticProps() {
-    return {
-        props: {
-            BACKEND_API: process.env.NEXT_PUBLIC_BACKEND_API_URL,
-        },
-    };
 }

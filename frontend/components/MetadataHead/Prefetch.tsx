@@ -1,18 +1,8 @@
 import React from "react";
 
-interface MetadataPrefetch {
-    BACKEND_API: string;
-}
-
-export default function MetadataHeadPrefetch(props: MetadataPrefetch) {
-    const { BACKEND_API } = props;
-    const URL_BACKEND = new URL(BACKEND_API);
-
+export default function MetadataHeadPrefetch() {
     return (
         <>
-            {/* Base Prefetch */}
-            <link rel="preconnect" href={URL_BACKEND.origin} />
-            <link rel="dns-prefetch" href={URL_BACKEND.origin} />
             {/* Youtube */}
             <link rel="preconnect" href="https://yt3.ggpht.com" />
             <link rel="dns-prefetch" href="https://yt3.ggpht.com" />

@@ -26,7 +26,6 @@ export interface JobProps {
     startTimeJS: string;
     onRemoval: (id: string) => void;
     callToast: (text: string, mode: ToastType) => void;
-    BACKEND_API: string;
 }
 
 interface JobState {
@@ -67,15 +66,11 @@ export default class JobCard extends React.Component<JobProps, JobState> {
         }
         this.setState({ deleteModal: false, disableDelete: true });
         const { onRemoval } = this.props;
-        const bodyFormData = new FormData();
-        bodyFormData.append("id", this.props.id);
-        bodyFormData.append("passkey", this.state.passBox);
-        const { BACKEND_API } = this.props;
         try {
-            await axios.delete(`${BACKEND_API}/api/jobs`, {
-                data: bodyFormData,
+            await axios.delete(`/api/jobs`, {
+                data: JSON.stringify({ id: this.props.id, passkey: this.state.passBox }),
                 headers: {
-                    "Content-Type": "multipart/form-data",
+                    "Content-Type": "application/json",
                 },
             });
             this.setState({ isDeleting: true, disableDelete: false }, () => {
@@ -103,13 +98,10 @@ export default class JobCard extends React.Component<JobProps, JobState> {
         }
         this.setState({ disableReload: true });
         const { callToast, url } = this.props;
-        const bodyFormData = new FormData();
-        bodyFormData.append("url", url);
-        const { BACKEND_API } = this.props;
         try {
-            await axios.put(`${BACKEND_API}/api/jobs`, bodyFormData, {
+            await axios.put(`/api/jobs`, JSON.stringify({ url }), {
                 headers: {
-                    "Content-Type": "multipart/form-data",
+                    "Content-Type": "application/json",
                 },
             });
             callToast(`Job ${url} reloaded!`, "info");
