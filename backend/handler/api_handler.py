@@ -67,18 +67,18 @@ def jobs_listing():
 
 @api_bp.route("/jobs", methods=["POST"])
 def add_new_jobs():
-    url = request.form.get("url", None)
+    url = request.json.get("url", None)
     if not url:
         return jsonify({"message": "Please provide url", "status_code": 400}), 400
 
     url = unquote(url)
 
-    password = request.form.get("passkey", None)
+    password = request.json.get("passkey", None)
     if not password:
         return jsonify({"message": "Please provide password/passkey", "status_code": 403}), 403
     if password.strip() != current_app.config["VTHELL_PASSKEY"]:
         return jsonify({"message": "Unknown passkey/password", "status_code": 401}), 401
-    callback_msg = request.form.get("callback", None)
+    callback_msg = request.json.get("callback", None)
 
     try:
         ytsc = YoutubeScheduler(url, current_app.config["YOUTUBE_DATA_API_KEY"])
@@ -96,11 +96,11 @@ def add_new_jobs():
 
 @api_bp.route("/jobs", methods=["DELETE"])
 def delete_job_data():
-    jobs_id = request.form.get("id", None)
+    jobs_id = request.json.get("id", None)
     if not jobs_id:
         return jsonify({"message": "Please provide id", "status_code": 400}), 400
 
-    password = request.form.get("passkey", None)
+    password = request.json.get("passkey", None)
     if not password:
         return jsonify({"message": "Please provide password/passkey", "status_code": 403}), 403
     if password.strip() != current_app.config["VTHELL_PASSKEY"]:
@@ -117,7 +117,7 @@ def delete_job_data():
 
 @api_bp.route("/jobs", methods=["PUT"])
 def reload_job_data():
-    url = request.form.get("url", None)
+    url = request.json.get("url", None)
     if not url:
         return jsonify({"message": "Please provide url", "status_code": 400}), 400
 
