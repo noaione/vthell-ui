@@ -68,7 +68,13 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
             <header className={"bg-gray-700 " + stickyModel}>
                 <nav className="relative select-none bg-gray-700 lg:flex lg:items-stretch w-full py-3">
                     <div className="w-full relative flex justify-between lg:w-auto pr-4 lg:static lg:block lg:justify-start">
-                        <a className="group flex flex-row items-center ml-4">
+                        <a
+                            className="group flex flex-row items-center ml-4"
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                outerThis.navigateLink(jobsUrl);
+                            }}
+                        >
                             <img src="https://p.n4o.xyz/i/cococlock.gif" alt="Coco Okite" className="h-12" />
                             <span className="font-semibold text-xl tracking-tight ml-2 text-white group-hover:opacity-80 transition">
                                 VTHell
