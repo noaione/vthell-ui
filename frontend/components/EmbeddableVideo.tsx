@@ -27,11 +27,12 @@ export type PlatformType = "youtube" | "twitch" | "twitcasting" | "bilibili" | "
 
 interface VideoEmbedProps {
     imageClassName?: string;
-    platform: PlatformType;
-    thumbnail: string;
+    platform: PlatformType | "unknown";
+    thumbnail?: string;
     status: "live" | "upcoming" | "past" | "video";
     id: string;
     url: string;
+    embedNow?: boolean;
 }
 
 interface VideoEmbedState {
@@ -42,8 +43,9 @@ export default class EmbeddableVideo extends React.Component<VideoEmbedProps, Vi
     constructor(props) {
         super(props);
         this.generateEmbed = this.generateEmbed.bind(this);
+        const { embedNow } = this.props;
         this.state = {
-            embedded: false,
+            embedded: embedNow ? true : false,
         };
     }
 
@@ -73,6 +75,7 @@ export default class EmbeddableVideo extends React.Component<VideoEmbedProps, Vi
                 );
             }
         }
+
         return (
             <div
                 className={`flex flex-col gap-2 items-center place-content-center place-items-center text-center bg-gradient-to-br from-gray-700 via-gray-600 to-gray-700 ${
