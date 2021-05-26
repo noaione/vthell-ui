@@ -1,8 +1,10 @@
 import React from "react";
 import Router from "next/router";
 
+import PlusIcon from "@heroicons/react/solid/PlusIcon";
+
 interface NavbarProps {
-    mode?: "home" | "records";
+    mode?: "home" | "records" | "create";
     noSticky?: boolean;
 }
 
@@ -33,6 +35,7 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
 
         let jobsUrl = "#";
         let recordedUrl = "#";
+        let createUrl = "#";
 
         let stickyModel = "sticky top-0 z-10";
         if (noSticky) {
@@ -41,8 +44,13 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
 
         if (mode === "records") {
             jobsUrl = "/";
+            createUrl = "/new";
+        } else if (mode === "create") {
+            jobsUrl = "/";
+            recordedUrl = "/records";
         } else {
             recordedUrl = "/records";
+            createUrl = "/new";
         }
 
         let extraClass = "hidden";
@@ -80,6 +88,13 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
                         }
                     >
                         <div className="lg:flex lg:items-stretch lg:justify-end ml-auto mr-4">
+                            <a
+                                href={createUrl}
+                                className="px-2 lg:px-1 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75 transition"
+                            >
+                                <PlusIcon className="w-5 h-5" />
+                                <span className="block lg:hidden">Add new jobs</span>
+                            </a>
                             <a
                                 href={jobsUrl}
                                 className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75 transition"
