@@ -1,8 +1,6 @@
 import axios, { AxiosResponse, Method } from "axios";
 import { NextApiRequest, NextApiResponse } from "next";
 
-import FormData from "form-data";
-
 import config from "../../package.json";
 import { isNone } from "../../lib/utils";
 
@@ -24,24 +22,17 @@ export default async function JobsAPI(req: NextApiRequest, res: NextApiResponse)
     const { NEXT_PUBLIC_BACKEND_API_URL } = process.env;
     const bodyBag = await req.body;
     const { method } = req;
-    const bodyFormData = new FormData();
-    for (const [key, value] of Object.entries(bodyBag)) {
-        bodyFormData.append(key, value);
-    }
-    const headers = bodyFormData.getHeaders();
-    console.info(headers);
     try {
         const resp = await axios({
             url: `${NEXT_PUBLIC_BACKEND_API_URL}/api/jobs`,
             method: method as Method,
-            data: bodyFormData,
+            data: JSON.stringify(bodyBag),
             responseType: "json",
             headers: {
-                ...headers,
+                "Content-Type": "application/json",
                 "User-Agent": `VTHell-WebUI/${config.version} (https://github.com/noaione/vthell-ui)`,
             },
         });
-        console.info("fetched", resp.status);
         res.setHeader("X-API-Version", config.version);
         res.status(resp.status).json({ ...resp.data });
     } catch (err) {
