@@ -27,6 +27,10 @@ body {
     @apply bg-transparent;
 }
 
+.vthell-toast {
+    @apply fixed top-[5.5rem] right-5 z-30 flex flex-col gap-2;
+}
+
 /* fade-transition */
 .fade-transition-enter {
     @apply opacity-0;
@@ -44,4 +48,38 @@ body {
 .fade-transition-exit-active {
     @apply opacity-0;
     @apply transition-opacity duration-200 ease-out;
+}
+
+.slide-right-enter {
+    animation: enterRight50px 200ms ease-in-out 1;
+    opacity: 0;
+    transform: translateX(50px);
+}
+
+.slide-right-leave {
+    animation: leaveRight50px 200ms ease-in-out 1;
+    opacity: 1;
+    transform: translateX(0px);
+}
+
+@keyframes enterRight50px {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0px);
+    }
+}
+
+@keyframes leaveRight50px {
+    from {
+        opacity: 1;
+        transform: translateX(0px);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(50px);
+    }
 }
