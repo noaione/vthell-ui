@@ -54,6 +54,11 @@ function DisclaimerSection() {
                 <code className="text-green-200">Member-Only Stream Archive</code> are protected with password
                 and only available to be seen here and not be downloaded by anyone elses.
             </p>
+            <p>
+                <b>2021-08-23 Update</b><br />
+                All of the archive that I have are currently nuked because my account got disabled.
+                If somehow I can recover it, I will turn on again my archive system.
+            </p>
         </>
     );
 }
@@ -187,23 +192,9 @@ export default class RecordsPage extends React.Component<{}, RecordsPageState> {
                         </label>
                     </div>
                     <div className="w-full block md:w-1/2 md:inline-block align-top p-5 treeboard-main">
-                        {isLoading ? (
-                            <div className="text-center text-2xl font-light text-gray-300 animate-pulse">
-                                <p>Loading data...</p>
-                            </div>
-                        ) : (
-                            <Treebeard
-                                data={data as TreeNode}
-                                onToggle={this.onToggled}
-                                decorators={{ ...decorators, Header: TreeHeader }}
-                                style={{
-                                    tree: {
-                                        node: { ...NodeBase, activeLink: { background: "#353535" } },
-                                        base: NodeBaseBase,
-                                    },
-                                }}
-                            />
-                        )}
+                        <div className="text-center text-xl text-gray-300">
+                            <p>Archive system is closed.</p>
+                        </div>
                     </div>
                     <div className="w-full block md:w-1/2 md:inline-block align-top p-5">
                         <NodeViewer node={cursor} />
