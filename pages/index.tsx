@@ -6,12 +6,11 @@ import Navbar from "@/components/Navbar";
 import ToastManager, { ToastCallbacks, ToastType } from "@/components/ToastManager";
 import { VTHellJob } from "@/lib/model";
 import { RootState } from "@/lib/store";
+import { isNone } from "@/lib/utils";
 import VTHellWebsocket from "@/lib/ws";
 import Head from "next/head";
 import React from "react";
 import { connect, ConnectedProps } from "react-redux";
-
-import config from "../config";
 
 const mapDispatch = {
     resetState: () => ({ type: "jobs/resetState" }),
@@ -51,8 +50,19 @@ export class VTHellHomepage extends React.Component<PropsFromRedux, State> {
     }
 
     async componentDidMount() {
-        this.ws = new VTHellWebsocket(config.ws_url);
         this.props.resetState();
+        const WS_URL = process.env.NEXT_PUBLIC_WS_URL;
+        if (isNone(WS_URL)) {
+            this.toast("NEXT_PUBLIC_WS_URL is not defined in the environment", "error");
+            return;
+        }
+        try {
+            this.ws = new VTHellWebsocket(WS_URL);
+        } catch (e) {
+            this.toast("Unable to create WS instance, check console", "error");
+            console.error(e);
+            return;
+        }
         this.ws.on("connect_job_init", (allJobs: VTHellJob[]) => {
             if (this.afterDisconnection) {
                 this.afterDisconnection = false;
