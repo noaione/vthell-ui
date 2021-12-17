@@ -28,3 +28,16 @@ export interface VTHellJob {
     error: string | null;
     path?: string;
 }
+
+export interface NodeTree {
+    id?: string | number;
+    type?: "file" | "folder";
+    size?: number;
+    mimetype?: string;
+    modtime?: number;
+    name: string;
+    toggled?: boolean;
+    active?: boolean;
+    loading?: boolean;
+    children?: NodeTree[];
+}

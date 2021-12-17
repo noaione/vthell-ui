@@ -1,3 +1,5 @@
+import { DateTime } from "luxon";
+
 export type Nullable<T> = T | null;
 export type NoneType = null | undefined;
 export type NoneAble<T> = T | NoneType;
@@ -47,6 +49,12 @@ export function humanizeBytes(bytes: number): string {
 }
 
 export function parseUnix(unix: number): string {
-    const dt = new Date(unix * 1000);
-    return dt.toString();
+    const dt = DateTime.fromSeconds(unix, { zone: "UTC" });
+    return dt.toLocaleString({
+        weekday: "short",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
 }
