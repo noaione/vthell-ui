@@ -44,6 +44,7 @@ export default class VTHellWebsocket {
             // @ts-ignore
             console.info("Connection established with the server", ev.target.url);
             this.reset = true;
+            this.#dispatchInternal("connect", null);
         };
         this.ws.onclose = (ev) => {
             // @ts-ignore
