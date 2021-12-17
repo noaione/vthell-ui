@@ -2,9 +2,9 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 
-import BaseContainer from "../components/BaseContainer";
-// import MetadataHead from "../components/MetadataHead";
-import Navbar from "../components/Navbar";
+import BaseContainer from "@/components/BaseContainer";
+import MetadataHead from "@/components/MetadataHead";
+import Navbar from "@/components/Navbar";
 
 export default function NotFoundPage() {
     const router = useRouter();
@@ -17,10 +17,10 @@ export default function NotFoundPage() {
     return (
         <>
             <Head>
-                {/* <MetadataHead.Base /> */}
+                <MetadataHead.Base />
                 <title>404 :: VTHell WebUI</title>
-                {/* <MetadataHead.SEO /> */}
-                {/* <MetadataHead.Prefetch /> */}
+                <MetadataHead.SEO title="404" description="The requested page cannot be found" />
+                <MetadataHead.Prefetch />
             </Head>
             <Navbar mode="error" />
             <main className="antialiased h-full pb-4">
