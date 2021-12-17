@@ -1,7 +1,9 @@
 import BackTopTop from "@/components/BackToTop";
 import BaseContainer from "@/components/BaseContainer";
 import JobCard from "@/components/JobCard";
+import MetadataHead from "@/components/MetadataHead";
 import Navbar from "@/components/Navbar";
+import ToastManager, { ToastCallbacks, ToastType } from "@/components/ToastManager";
 import { VTHellJob } from "@/lib/model";
 import { RootState } from "@/lib/store";
 import VTHellWebsocket from "@/lib/ws";
@@ -30,35 +32,54 @@ interface State {
 
 export class VTHellHomepage extends React.Component<PropsFromRedux, State> {
     ws?: VTHellWebsocket;
+    toastCb?: ToastCallbacks;
+    afterDisconnection: boolean;
 
     constructor(props) {
         super(props);
+        this.toast = this.toast.bind(this);
+        this.afterDisconnection = false;
         this.state = {
             isLoading: true,
         };
+    }
+
+    toast(message: string, type: ToastType = "default") {
+        if (this.toastCb) {
+            this.toastCb.showToast(message, type);
+        }
     }
 
     async componentDidMount() {
         this.ws = new VTHellWebsocket(config.ws_url);
         this.props.resetState();
         this.ws.on("connect_job_init", (allJobs: VTHellJob[]) => {
+            if (this.afterDisconnection) {
+                this.afterDisconnection = false;
+                this.toast("Reconnected to VTHell Websocket", "info");
+            }
             this.props.addJobs(allJobs);
             this.setState({ isLoading: false });
         });
         this.ws.on("job_update", (job: VTHellJob) => {
             if (["DONE", "CLEANING"].includes(job.status)) {
                 this.props.removeJob(job.id);
+                this.toast(`Job ID ${job.id} has finished!`, "info");
             } else {
                 this.props.updateJob(job);
             }
         });
         this.ws.on("job_scheduled", (job: VTHellJob) => {
+            this.toast(`Added Job ${job.id} to list!`, "info");
             this.props.addJob(job);
         });
         this.ws.on("job_delete", (job: Pick<VTHellJob, "id">) => {
+            this.toast(`Job ID ${job.id} got deleted!`, "info");
             this.props.removeJob(job.id);
         });
         this.ws.on("closed", () => {
+            this.toast("Lost connection to WebSocket, reconnecting...", "error");
+            this.afterDisconnection = true;
             this.setState({ isLoading: true }, () => {
                 this.props.resetState();
             });
@@ -71,7 +92,10 @@ export class VTHellHomepage extends React.Component<PropsFromRedux, State> {
         return (
             <React.Fragment key="VTHellHomepage">
                 <Head>
+                    <MetadataHead.Base />
                     <title>Home :: VTHell API</title>
+                    <MetadataHead.SEO />
+                    <MetadataHead.Prefetch />
                 </Head>
                 <Navbar />
                 <main className="h-full pb-4 antialiased">
@@ -99,6 +123,7 @@ export class VTHellHomepage extends React.Component<PropsFromRedux, State> {
                         </>
                     )}
                 </main>
+                <ToastManager duration={5000} onMounted={(cb) => (this.toastCb = cb)} />
                 <BackTopTop />
             </React.Fragment>
         );
