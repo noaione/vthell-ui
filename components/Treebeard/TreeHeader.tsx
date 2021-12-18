@@ -47,7 +47,7 @@ export default function TreeHeader(props: HeaderProps) {
     return (
         <div className="inline-block">
             <InlineIcon className="w-4 h-4 inline-block mr-0.5" />
-            {node.name}
+            <span>{node.name}</span>
         </div>
     );
 }

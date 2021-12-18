@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { DateTime } from "luxon";
+import React from "react";
 
 import { VTHellJob, VTHellJobStatus } from "@/lib/model";
 import BaseContainer from "./BaseContainer";
@@ -7,6 +6,7 @@ import YoutubeEmbed from "./YoutubeEmbed";
 import Buttons from "./Buttons";
 import DeleteModal from "./Modal/DeleteModal";
 import { CallbackModal } from "./Modal/Base";
+import DynamicDateTime from "./DynamicDateTime";
 
 export function mapStatusFormat(status: VTHellJobStatus) {
     switch (status) {
@@ -33,38 +33,6 @@ export function mapStatusFormat(status: VTHellJobStatus) {
 
 interface JobProps {
     job: VTHellJob;
-}
-
-function DynamicDateTime(props: { unix: number }) {
-    const [zone, setZone] = useState("UTC");
-
-    useEffect(() => {
-        try {
-            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            if (typeof timezone === "string") {
-                setZone(timezone);
-            }
-        } catch (e) {
-            // who the fuck use this browser anymore
-            return;
-        }
-    }, []);
-
-    const date = DateTime.fromSeconds(props.unix, { zone: "UTC" }).setZone(zone);
-
-    return (
-        <span>
-            {date.toLocaleString({
-                weekday: "short",
-                month: "short",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-            }) +
-                " UTC" +
-                date.toFormat("Z")}
-        </span>
-    );
 }
 
 export default class JobCard extends React.Component<JobProps> {

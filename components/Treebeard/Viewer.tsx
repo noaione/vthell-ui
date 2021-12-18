@@ -5,7 +5,11 @@ import { humanizeBytes, parseUnix } from "@/lib/utils";
 
 const HELP_MSG = "Select a File/Folder to see It's Information.";
 
-function countFolderSizesRecurce(node: NodeTree, cb: (size: number) => void, cb2: (node: NodeTree) => void) {
+export function countFolderSizesRecurce(
+    node: NodeTree,
+    cb: (size: number) => void,
+    cb2: (node: NodeTree) => void
+) {
     const children = node.children ?? [];
     for (let i = 0; i < children.length; i++) {
         const child = children[i];
@@ -29,6 +33,13 @@ interface NodeViewerProps {
 export default function NodeViewer(props: NodeViewerProps) {
     const { node } = props;
     if (!node) {
+        return (
+            <div className="min-h-full text-sm whitespace-pre-wrap bg-gray-700 text-gray-100 p-5">
+                {HELP_MSG}
+            </div>
+        );
+    }
+    if (node.loading) {
         return (
             <div className="min-h-full text-sm whitespace-pre-wrap bg-gray-700 text-gray-100 p-5">
                 {HELP_MSG}

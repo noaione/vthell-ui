@@ -3,10 +3,12 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 import jobsReducer from "./slices/job";
+import recordsReducer from "./slices/records";
 
 export const store = configureStore({
     reducer: {
         jobs: jobsReducer,
+        records: recordsReducer,
     },
     // @ts-ignore
     enhancers: (defaults) => {
