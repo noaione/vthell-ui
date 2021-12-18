@@ -1,20 +1,22 @@
+import { buildPath, isNone } from "@/lib/utils";
 import React from "react";
 import Buttons from "../Buttons";
 
 import Modal, { CallbackModal, ModalProps } from "./Base";
 
 interface ModalProperties extends ModalProps {
-    videoId?: string;
+    videoId: string;
 }
 
 interface DeleteModalState {
     passbox: string;
+    isSubmit: boolean;
 }
 
 export default class DeleteModal extends React.Component<ModalProperties, DeleteModalState> {
     modalCb?: CallbackModal;
 
-    constructor(props: ModalProps) {
+    constructor(props: ModalProperties) {
         super(props);
         this.handleHide = this.handleHide.bind(this);
         this.handleShow = this.handleShow.bind(this);
@@ -22,6 +24,7 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
         this.apiDeleteRequest = this.apiDeleteRequest.bind(this);
         this.state = {
             passbox: "",
+            isSubmit: false,
         };
     }
 
@@ -37,7 +40,7 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
     }
 
     handleHide() {
-        this.setState({ passbox: "" });
+        this.setState({ passbox: "", isSubmit: false });
         if (this.modalCb) {
             this.modalCb.hideModal();
         }
@@ -55,12 +58,56 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
         }
     }
 
+    toast(text: string, mode: string = "default") {
+        document.dispatchEvent(new CustomEvent("toastNotification", { detail: { text, mode } }));
+    }
+
     async apiDeleteRequest() {
         const { videoId } = this.props;
-        console.info(`Deleting request of ${videoId}`);
-        setTimeout(() => {
+        const { passbox } = this.state;
+        const { NEXT_PUBLIC_HTTP_URL } = process.env;
+        if (isNone(NEXT_PUBLIC_HTTP_URL)) {
+            this.toast("Cannot find the public HTTP url to submit deletion! Contact admin!", "error");
             this.handleHide();
-        }, 1000);
+            return;
+        }
+        console.info(`Deleting request of ${videoId}`);
+        this.setState({ isSubmit: true });
+
+        const url = buildPath(NEXT_PUBLIC_HTTP_URL, ["api", "schedule", videoId]);
+
+        const resp = await fetch(url, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Password ${passbox}`,
+            },
+        });
+        switch (resp.status) {
+            case 200:
+                this.handleHide();
+                break;
+            case 401:
+                this.toast("Wrong password!", "error");
+                this.handleHide();
+                break;
+            case 403:
+                this.toast("You are not authorized to delete this video!", "error");
+                this.handleHide();
+                break;
+            case 404:
+                this.toast("Video not found on VTHell!", "error");
+                this.handleHide();
+                break;
+            case 406:
+                this.toast("Video status does not allow for deletion!", "error");
+                this.handleHide();
+                break;
+            case 500:
+                this.toast("Internal server error!", "error");
+                console.error(resp);
+                this.handleHide();
+                break;
+        }
     }
 
     render() {
@@ -99,7 +146,11 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
                 </Modal.Body>
                 <Modal.Footer className="justify-center gap-2">
                     <Buttons onClick={() => this.handleHide()}>Cancel</Buttons>
-                    <Buttons onClick={this.apiDeleteRequest} btnType="danger" disabled={passbox.length < 1}>
+                    <Buttons
+                        onClick={this.apiDeleteRequest}
+                        btnType="danger"
+                        disabled={passbox.length < 1 || this.state.isSubmit}
+                    >
                         Delete
                     </Buttons>
                 </Modal.Footer>

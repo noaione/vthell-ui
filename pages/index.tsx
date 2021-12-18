@@ -1,6 +1,6 @@
 import BackTopTop from "@/components/BackToTop";
 import BaseContainer from "@/components/BaseContainer";
-import JobCard from "@/components/JobCard";
+import JobCard, { mapStatusFormat } from "@/components/JobCard";
 import MetadataHead from "@/components/MetadataHead";
 import Navbar from "@/components/Navbar";
 import ToastManager, { ToastCallbacks, ToastType } from "@/components/ToastManager";
@@ -44,9 +44,13 @@ export class VTHellHomepage extends React.Component<PropsFromRedux, State> {
     }
 
     toast(message: string, type: ToastType = "default") {
-        if (this.toastCb) {
-            this.toastCb.showToast(message, type);
-        }
+        const event = new CustomEvent("toastNotification", {
+            detail: {
+                text: message,
+                mode: type,
+            },
+        });
+        document.dispatchEvent(event);
     }
 
     async componentDidMount() {
@@ -72,11 +76,15 @@ export class VTHellHomepage extends React.Component<PropsFromRedux, State> {
             this.setState({ isLoading: false });
         });
         this.ws.on("job_update", (job: VTHellJob) => {
-            if (["DONE", "CLEANING"].includes(job.status)) {
-                this.props.removeJob(job.id);
-                this.toast(`Job ID ${job.id} has finished!`, "info");
-            } else {
-                this.props.updateJob(job);
+            const isExist = this.props.jobs.some((j) => j.id === job.id);
+            if (isExist) {
+                if (["DONE", "CLEANING"].includes(job.status)) {
+                    this.props.removeJob(job.id);
+                    this.toast(`Job ID ${job.id} has finished!`, "info");
+                } else {
+                    this.props.updateJob(job);
+                    this.toast(`Job ${job.id} status changed to: ${mapStatusFormat(job.status)}`, "info");
+                }
             }
         });
         this.ws.on("job_scheduled", (job: VTHellJob) => {
@@ -84,8 +92,11 @@ export class VTHellHomepage extends React.Component<PropsFromRedux, State> {
             this.props.addJob(job);
         });
         this.ws.on("job_delete", (job: Pick<VTHellJob, "id">) => {
-            this.toast(`Job ID ${job.id} got deleted!`, "info");
-            this.props.removeJob(job.id);
+            const isExist = this.props.jobs.some((j) => j.id === job.id);
+            if (isExist) {
+                this.props.removeJob(job.id);
+                this.toast(`Job ID ${job.id} got deleted!`, "info");
+            }
         });
         this.ws.on("closed", () => {
             this.toast("Lost connection to WebSocket, reconnecting...", "error");

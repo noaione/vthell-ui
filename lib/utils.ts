@@ -58,3 +58,28 @@ export function parseUnix(unix: number): string {
         minute: "2-digit",
     });
 }
+
+export function buildPath(baseUrl: string, extraPaths: string[]): string {
+    if (baseUrl.endsWith("/")) {
+        baseUrl = baseUrl.slice(0, -1);
+    }
+    let path = baseUrl;
+    for (const p of extraPaths) {
+        if (p.startsWith("/")) {
+            path += p;
+        } else {
+            path += "/" + p;
+        }
+    }
+    return path;
+}
+
+export function selectSingle(query: string | string[]) {
+    if (isNone(query)) {
+        return "";
+    }
+    if (typeof query === "string") {
+        return query;
+    }
+    return query[0];
+}

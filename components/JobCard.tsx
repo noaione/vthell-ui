@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { DateTime } from "luxon";
 
 import { VTHellJob, VTHellJobStatus } from "@/lib/model";
@@ -8,7 +8,7 @@ import Buttons from "./Buttons";
 import DeleteModal from "./Modal/DeleteModal";
 import { CallbackModal } from "./Modal/Base";
 
-function mapStatusFormat(status: VTHellJobStatus) {
+export function mapStatusFormat(status: VTHellJobStatus) {
     switch (status) {
         case "DONE":
             return "Finished recording";
@@ -35,6 +35,38 @@ interface JobProps {
     job: VTHellJob;
 }
 
+function DynamicDateTime(props: { unix: number }) {
+    const [zone, setZone] = useState("UTC");
+
+    useEffect(() => {
+        try {
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (typeof timezone === "string") {
+                setZone(timezone);
+            }
+        } catch (e) {
+            // who the fuck use this browser anymore
+            return;
+        }
+    }, []);
+
+    const date = DateTime.fromSeconds(props.unix, { zone: "UTC" }).setZone(zone);
+
+    return (
+        <span>
+            {date.toLocaleString({
+                weekday: "short",
+                month: "short",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+            }) +
+                " UTC" +
+                date.toFormat("Z")}
+        </span>
+    );
+}
+
 export default class JobCard extends React.Component<JobProps> {
     modalCb?: CallbackModal;
 
@@ -51,7 +83,6 @@ export default class JobCard extends React.Component<JobProps> {
 
     render(): React.ReactNode {
         const { job } = this.props;
-        const parsedStart = DateTime.fromSeconds(job.start_time, { zone: "UTC" });
 
         return (
             <div id={`job-${job.id}`} className="flex mx-2">
@@ -67,13 +98,7 @@ export default class JobCard extends React.Component<JobProps> {
                         </p>
                         <p className="mt-2 text-white text-lg font-semibold">{job.title}</p>
                         <p className="mt-2 ml-1">
-                            {parsedStart.toLocaleString({
-                                weekday: "short",
-                                month: "short",
-                                day: "2-digit",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            })}
+                            <DynamicDateTime unix={job.start_time} />
                         </p>
                     </div>
                     <div className="px-4 py-4 text-gray-200 bg-gray-800">

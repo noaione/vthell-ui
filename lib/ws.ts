@@ -31,8 +31,13 @@ export default class VTHellWebsocket {
     }
 
     #dispatchInternal(event: string, data: any) {
+        if (event === "ping") {
+            this.ws.send(JSON.stringify({ event: "pong", data }));
+            return;
+        }
         const allHandlers = this.eventHandler[event];
         if (typeof allHandlers !== "undefined") {
+            console.debug("Dispatching event", event, data);
             allHandlers.forEach((handler) => {
                 handler(data);
             });
@@ -42,13 +47,13 @@ export default class VTHellWebsocket {
     #bindHandler() {
         this.ws.onopen = (ev) => {
             // @ts-ignore
-            console.info("Connection established with the server", ev.target.url);
+            console.debug("Connection established with the server", ev.target.url);
             this.reset = true;
             this.#dispatchInternal("connect", null);
         };
         this.ws.onclose = (ev) => {
             // @ts-ignore
-            console.info("Connection closed with the server", ev.target.url);
+            console.debug("Connection closed with the server", ev.target.url);
             this.#dispatchInternal("closed", ev);
             setTimeout(() => {
                 this.resetConnection();
@@ -59,13 +64,11 @@ export default class VTHellWebsocket {
             this.ws.close();
         };
         this.ws.onmessage = (ev) => {
-            console.debug("Message received", ev);
             const rawData = ev.data;
             if (rawData instanceof Blob) {
                 rawData.text().then((text) => {
                     const asJson = JSON.parse(text);
                     if (typeof asJson === "undefined" || asJson === null) {
-                        console.error("Invalid JSON");
                         return;
                     }
                     const { event, data } = asJson;
@@ -74,11 +77,15 @@ export default class VTHellWebsocket {
             } else if (typeof rawData === "string") {
                 const asJson = JSON.parse(rawData);
                 if (typeof asJson === "undefined" || asJson === null) {
-                    console.error("Invalid JSON");
                     return;
                 }
                 const { event, data } = asJson;
                 this.#dispatchInternal(event, data);
+            } else if (typeof rawData === "object") {
+                try {
+                    const { event, data } = rawData;
+                    this.#dispatchInternal(event, data);
+                } catch (e) {}
             }
         };
     }

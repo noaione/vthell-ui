@@ -4,7 +4,8 @@ import { motion, useAnimation } from "framer-motion";
 import InfoIcon from "./Icons/InformationCircleIcon";
 import ErrorIcon from "./Icons/ErrorIcon";
 
-import { isType } from "../lib/utils";
+import { isNone, isType } from "../lib/utils";
+import Portal from "./Portal";
 
 function isValidNumber(data: any): data is number {
     if (!isType(data as number, "number")) {
@@ -17,19 +18,45 @@ function isValidNumber(data: any): data is number {
 }
 
 export type ToastType = "default" | "info" | "error";
+
+type ToastModeCollection = {
+    [key in ToastType]: string;
+};
+
+function fallback<T extends ToastModeCollection>(
+    dataSet: T,
+    key: keyof T,
+    fallbackValue: T[keyof T]
+): T[keyof T] {
+    if (isNone(dataSet)) {
+        return fallbackValue;
+    }
+    const data = dataSet[key];
+    if (isNone(data)) {
+        return fallbackValue;
+    }
+    return data;
+}
 export interface ToastCallbacks {
     showToast: (text: string, mode?: ToastType) => void;
 }
 
-interface ToastCollectionData {
-    id: string;
+export interface ToastData {
     text: string;
     mode: ToastType;
 }
 
+export interface ToastDataEvent extends Event {
+    detail: ToastData;
+}
+
+interface ToastCollectionData extends ToastData {
+    id: string;
+}
+
 interface ToastProps {
     duration?: number;
-    onMounted: (callbacks: ToastCallbacks) => void;
+    onMounted?: (callbacks: ToastCallbacks) => void;
 }
 
 interface ToastState {
@@ -37,7 +64,7 @@ interface ToastState {
     toastCollection: ToastCollectionData[];
 }
 
-interface ToastData {
+interface ToastBoxData {
     toast: ToastCollectionData;
     innerClassName?: string;
     duration: number;
@@ -56,7 +83,7 @@ function SelectedIcon(props: Pick<ToastCollectionData, "mode">) {
     return null;
 }
 
-function NotificationBox(props: ToastData) {
+function NotificationBox(props: ToastBoxData) {
     const {
         toast: { id, mode },
         duration,
@@ -116,6 +143,7 @@ function NotificationBox(props: ToastData) {
         info: "bg-blue-700 border-blue-500",
         error: "bg-red-700 border-red-500",
     };
+    const styling = fallback(stylings, mode, stylings.default);
 
     return (
         <motion.div
@@ -126,8 +154,8 @@ function NotificationBox(props: ToastData) {
             animate={controls}
             transition={{ duration: 0.2 }}
         >
-            {mode !== "default" && (
-                <span className={`${stylings[mode]} w-[50px] h-[50px] rounded-l-lg -mr-2`}>
+            {styling !== stylings.default && (
+                <span className={`${styling} w-[50px] h-[50px] rounded-l-lg -mr-2`}>
                     <SelectedIcon mode={mode} />
                 </span>
             )}
@@ -145,6 +173,7 @@ export default class ToastManager extends React.Component<ToastProps, ToastState
         const { duration } = this.props;
         this.showToast = this.showToast.bind(this);
         this.onToastFinished = this.onToastFinished.bind(this);
+        this.onToastNotification = this.onToastNotification.bind(this);
 
         this.state = {
             duration: isValidNumber(duration) ? duration : 3000,
@@ -152,44 +181,66 @@ export default class ToastManager extends React.Component<ToastProps, ToastState
         };
     }
 
+    onToastNotification(event: Event) {
+        const { detail } = event as ToastDataEvent;
+        if (isNone(detail)) {
+            return;
+        }
+        const { text, mode } = detail;
+        if (!isNone(text) && text.trim().length > 0) {
+            this.showToast(text, mode);
+        }
+    }
+
     componentDidMount() {
-        this.props.onMounted({
-            showToast: (text, mode) => this.showToast(text, mode),
-        });
+        if (typeof this.props.onMounted === "function") {
+            this.props.onMounted({
+                showToast: (text, mode) => this.showToast(text, mode),
+            });
+        }
+
+        // Add custom event receiver
+        document.addEventListener("toastNotification", this.onToastNotification);
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener("toastNotification", this.onToastNotification);
     }
 
     showToast(text: string, mode: ToastType = "default") {
         const { toastCollection } = this.state;
         toastCollection.push({ id: `toasty-${this.toastId}`, text, mode });
         this.toastId++;
-        console.info("showToast:", toastCollection);
+        console.debug("showToast:", toastCollection);
         this.setState({ toastCollection });
     }
 
     onToastFinished(id: string) {
         let { toastCollection } = this.state;
         toastCollection = toastCollection.filter((ev) => ev.id !== id);
-        console.info("onToastFinished:", toastCollection);
+        console.debug("onToastFinished:", toastCollection);
         this.setState({ toastCollection });
     }
 
     render() {
         return (
-            <div className="vthell-toast">
-                {this.state.toastCollection.map((toast) => {
-                    return (
-                        <NotificationBox
-                            key={toast.id}
-                            toast={toast}
-                            duration={this.state.duration}
-                            onFinished={this.onToastFinished}
-                            innerClassName="px-5 py-3"
-                        >
-                            {toast.text}
-                        </NotificationBox>
-                    );
-                })}
-            </div>
+            <Portal id="toast-notification">
+                <div className="vthell-toast">
+                    {this.state.toastCollection.map((toast) => {
+                        return (
+                            <NotificationBox
+                                key={toast.id}
+                                toast={toast}
+                                duration={this.state.duration}
+                                onFinished={this.onToastFinished}
+                                innerClassName="px-5 py-3"
+                            >
+                                {toast.text}
+                            </NotificationBox>
+                        );
+                    })}
+                </div>
+            </Portal>
         );
     }
 }
