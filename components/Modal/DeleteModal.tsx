@@ -11,6 +11,7 @@ interface ModalProperties extends ModalProps {
 interface DeleteModalState {
     passbox: string;
     isSubmit: boolean;
+    force: boolean;
 }
 
 export default class DeleteModal extends React.Component<ModalProperties, DeleteModalState> {
@@ -25,6 +26,7 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
         this.state = {
             passbox: "",
             isSubmit: false,
+            force: false,
         };
     }
 
@@ -74,7 +76,10 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
         console.info(`Deleting request of ${videoId}`);
         this.setState({ isSubmit: true });
 
-        const url = buildPath(NEXT_PUBLIC_HTTP_URL, ["api", "schedule", videoId]);
+        let url = buildPath(NEXT_PUBLIC_HTTP_URL, ["api", "schedule", videoId]);
+        if (this.state.force) {
+            url += "?force=1";
+        }
 
         const resp = await fetch(url, {
             method: "DELETE",
@@ -141,6 +146,16 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
                                 onChange={(ev) => this.setState({ passbox: ev.target.value })}
                                 placeholder="**************"
                             />
+                        </label>
+                        <label className="inline-flex flex-row items-center justify-center w-full gap-2 mt-3">
+                            <input
+                                type="checkbox"
+                                onChange={(ev) => this.setState({ force: ev.target.checked })}
+                                checked={this.state.force}
+                            />
+                            <span className="text-gray-100 text-sm tracking-wide text-left">
+                                Force deletion
+                            </span>
                         </label>
                     </div>
                 </Modal.Body>
