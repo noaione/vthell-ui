@@ -61,8 +61,8 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
         }
 
         return (
-            <header className={"bg-gray-700 " + stickyModel}>
-                <nav className="relative select-none bg-gray-700 lg:flex lg:items-stretch w-full py-3">
+            <header className={"bg-gray-700/80 backdrop-blur-xl " + stickyModel}>
+                <nav className="relative select-none lg:flex lg:items-stretch w-full py-3">
                     <div className="w-full relative flex justify-between lg:w-auto pr-4 lg:static lg:block lg:justify-start">
                         <a
                             className="group flex flex-row items-center ml-4"
