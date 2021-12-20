@@ -1,8 +1,9 @@
 import React from "react";
 import Router from "next/router";
+import { isNone } from "@/lib/utils";
 
 interface NavbarProps {
-    mode?: "home" | "records" | "create" | "error";
+    mode?: "home" | "records" | "create" | "scheduler" | "error";
     noSticky?: boolean;
 }
 
@@ -34,6 +35,7 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
         let jobsUrl = "#";
         let recordedUrl = "#";
         let createUrl = "#";
+        let schedulerUrl = "#";
 
         let stickyModel = "sticky top-0 z-10";
         if (noSticky) {
@@ -43,22 +45,33 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
         if (mode === "records") {
             jobsUrl = "/";
             createUrl = "/new";
+            schedulerUrl = "/scheduler";
         } else if (mode === "create") {
             jobsUrl = "/";
             recordedUrl = "/records";
+            schedulerUrl = "/scheduler";
         } else if (mode === "error") {
+            jobsUrl = "/";
+            recordedUrl = "/records";
+            createUrl = "/new";
+            schedulerUrl = "/scheduler";
+        } else if (mode === "scheduler") {
             jobsUrl = "/";
             recordedUrl = "/records";
             createUrl = "/new";
         } else {
             recordedUrl = "/records";
             createUrl = "/new";
+            schedulerUrl = "/scheduler";
         }
 
         let extraClass = "hidden";
         if (this.state.active) {
             extraClass = "";
         }
+
+        const { NEXT_PUBLIC_ARCHIVE_URL } = process.env;
+        const downloadPage = !isNone(NEXT_PUBLIC_ARCHIVE_URL) ? new URL(NEXT_PUBLIC_ARCHIVE_URL) : null;
 
         return (
             <header className={"bg-gray-700/80 backdrop-blur-xl " + stickyModel}>
@@ -122,13 +135,25 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
                                 Records
                             </a>
                             <a
-                                href="https://vthell.ihateani.me"
+                                href={schedulerUrl}
                                 className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75 transition"
-                                rel="noopener noreferrer"
-                                target="_blank"
+                                onClick={(ev) => {
+                                    ev.preventDefault();
+                                    this.navigateLink(schedulerUrl);
+                                }}
                             >
-                                Archive
+                                Scheduler
                             </a>
+                            {downloadPage && (
+                                <a
+                                    href={downloadPage.href}
+                                    className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75 transition"
+                                    rel="noopener noreferrer"
+                                    target="_blank"
+                                >
+                                    Archive
+                                </a>
+                            )}
                         </div>
                     </div>
                 </nav>
