@@ -1,9 +1,10 @@
 import React from "react";
 import Router from "next/router";
 import { isNone } from "@/lib/utils";
+import LoginIcon from "./Icons/LoginIcon";
 
 interface NavbarProps {
-    mode?: "home" | "records" | "create" | "scheduler" | "error";
+    mode?: "home" | "records" | "create" | "scheduler" | "error" | "login";
     noSticky?: boolean;
 }
 
@@ -36,6 +37,7 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
         let recordedUrl = "#";
         let createUrl = "#";
         let schedulerUrl = "#";
+        let loginUrl = "#";
 
         let stickyModel = "sticky top-0 z-10";
         if (noSticky) {
@@ -46,23 +48,33 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
             jobsUrl = "/";
             createUrl = "/new";
             schedulerUrl = "/scheduler";
+            loginUrl = "/login";
         } else if (mode === "create") {
             jobsUrl = "/";
             recordedUrl = "/records";
             schedulerUrl = "/scheduler";
+            loginUrl = "/login";
         } else if (mode === "error") {
             jobsUrl = "/";
             recordedUrl = "/records";
             createUrl = "/new";
             schedulerUrl = "/scheduler";
+            loginUrl = "/login";
         } else if (mode === "scheduler") {
             jobsUrl = "/";
             recordedUrl = "/records";
             createUrl = "/new";
+            loginUrl = "/login";
+        } else if (mode === "login") {
+            jobsUrl = "/";
+            recordedUrl = "/records";
+            createUrl = "/new";
+            schedulerUrl = "/scheduler";
         } else {
             recordedUrl = "/records";
             createUrl = "/new";
             schedulerUrl = "/scheduler";
+            loginUrl = "/login";
         }
 
         let extraClass = "hidden";
@@ -154,6 +166,17 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
                                     Archive
                                 </a>
                             )}
+                            <a
+                                href={loginUrl}
+                                className="px-3 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75 transition"
+                                onClick={(ev) => {
+                                    ev.preventDefault();
+                                    this.navigateLink(loginUrl);
+                                }}
+                            >
+                                <LoginIcon className="w-5 h-5" />
+                                <span className="block lg:hidden mx-1">Login</span>
+                            </a>
                         </div>
                     </div>
                 </nav>
