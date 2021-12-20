@@ -29,6 +29,7 @@ class AutoSchedulerCard extends React.Component<PropsFromRedux & ExtraProps, Sta
     constructor(props) {
         super(props);
         this.shoeDeleteModal = this.shoeDeleteModal.bind(this);
+        this.onDeleted = this.onDeleted.bind(this);
 
         this.state = {
             isEditing: false,
@@ -39,6 +40,14 @@ class AutoSchedulerCard extends React.Component<PropsFromRedux & ExtraProps, Sta
         if (this.deleteModal) {
             this.deleteModal.showModal();
         }
+    }
+
+    onDeleted() {
+        const event = new CustomEvent("toastNotification", {
+            detail: { text: `Scheduler #${this.props.scheduler.id} has been deleted.`, mode: "info" },
+        });
+        document.dispatchEvent(event);
+        this.props.removeScheduler(this.props.scheduler.id);
     }
 
     render() {
@@ -59,9 +68,24 @@ class AutoSchedulerCard extends React.Component<PropsFromRedux & ExtraProps, Sta
                             )}
                         </span>
                         <span>{scheduler.data}</span>
+                        {scheduler.chains !== null &&
+                            scheduler.chains.map((chain, idx) => {
+                                return (
+                                    <React.Fragment key={`scheduler-${scheduler.id}-chain-${idx}`}>
+                                        <span>
+                                            <span className="font-semibold">Chain #{idx + 1}: </span>
+                                            <span>
+                                                {" "}
+                                                <span className="text-gray-300">{chain.data}</span>{" "}
+                                                <span className="tracking-wide uppercase">{`(${chain.type})`}</span>
+                                            </span>
+                                        </span>
+                                    </React.Fragment>
+                                );
+                            })}
                     </div>
                     {isAdmin && (
-                        <div className="flex flex-row gap-2">
+                        <div className="flex flex-row gap-2 my-auto">
                             <Buttons btnType="warning" onClick={() => this.setState({ isEditing: true })}>
                                 Edit
                             </Buttons>
@@ -75,7 +99,7 @@ class AutoSchedulerCard extends React.Component<PropsFromRedux & ExtraProps, Sta
                     passId={scheduler.id.toString()}
                     path="auto-scheduler"
                     onMounted={(cb) => (this.deleteModal = cb)}
-                    onDeleteSuccess={() => this.props.removeScheduler(scheduler.id)}
+                    onDeleteSuccess={() => this.onDeleted()}
                 />
             </>
         );

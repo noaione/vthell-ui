@@ -21,7 +21,7 @@ export const getServerSideProps = withSessionSSR(async ({ req }) => {
     if (user.isLoggedIn) {
         return { props: { loggedIn: true } };
     }
-    if (user.username !== "admin") {
+    if (user.user !== "admin") {
         return { props: { loggedIn: false } };
     }
 
