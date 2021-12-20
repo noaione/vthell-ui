@@ -5,7 +5,9 @@ import Buttons from "../Buttons";
 import Modal, { CallbackModal, ModalProps } from "./Base";
 
 interface ModalProperties extends ModalProps {
-    videoId: string;
+    passId: string;
+    path: string;
+    onDeleteSuccess?: () => void;
 }
 
 interface DeleteModalState {
@@ -22,6 +24,7 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
         this.handleHide = this.handleHide.bind(this);
         this.handleShow = this.handleShow.bind(this);
         this.toggleModal = this.toggleModal.bind(this);
+        this.callDeleteSuccess = this.callDeleteSuccess.bind(this);
         this.apiDeleteRequest = this.apiDeleteRequest.bind(this);
         this.state = {
             passbox: "",
@@ -42,7 +45,7 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
     }
 
     handleHide() {
-        this.setState({ passbox: "", isSubmit: false });
+        this.setState({ passbox: "", isSubmit: false, force: false });
         if (this.modalCb) {
             this.modalCb.hideModal();
         }
@@ -64,8 +67,14 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
         document.dispatchEvent(new CustomEvent("toastNotification", { detail: { text, mode } }));
     }
 
+    callDeleteSuccess() {
+        if (typeof this.props.onDeleteSuccess === "function") {
+            this.props.onDeleteSuccess();
+        }
+    }
+
     async apiDeleteRequest() {
-        const { videoId } = this.props;
+        const { passId, path } = this.props;
         const { passbox } = this.state;
         const { NEXT_PUBLIC_HTTP_URL } = process.env;
         if (isNone(NEXT_PUBLIC_HTTP_URL)) {
@@ -73,10 +82,10 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
             this.handleHide();
             return;
         }
-        console.info(`Deleting request of ${videoId}`);
+        console.info(`Deleting request of ${passId}`);
         this.setState({ isSubmit: true });
 
-        let url = buildPath(NEXT_PUBLIC_HTTP_URL, ["api", "schedule", videoId]);
+        let url = buildPath(NEXT_PUBLIC_HTTP_URL, ["api", path, passId]);
         if (this.state.force) {
             url += "?force=1";
         }
@@ -90,17 +99,18 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
         switch (resp.status) {
             case 200:
                 this.handleHide();
+                this.callDeleteSuccess();
                 break;
             case 401:
                 this.toast("Wrong password!", "error");
                 this.handleHide();
                 break;
             case 403:
-                this.toast("You are not authorized to delete this video!", "error");
+                this.toast("You are not authorized to remove it!", "error");
                 this.handleHide();
                 break;
             case 404:
-                this.toast("Video not found on VTHell!", "error");
+                this.toast("The target is missing!", "error");
                 this.handleHide();
                 break;
             case 406:
@@ -126,6 +136,7 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
                 onMounted={(callback) => (this.modalCb = callback)}
                 onClose={() => {
                     // Forward the onClose
+                    this.setState({ isSubmit: false, force: false, passbox: "" });
                     if (typeof onClose === "function") {
                         onClose();
                     }
@@ -133,7 +144,7 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
             >
                 <Modal.Head>⚠ Are you sure?</Modal.Head>
                 <Modal.Body>
-                    <span>This will permanently delete the job</span>
+                    <span>This will permanently delete the target</span>
                     <div className="mt-2">
                         <label className="inline-flex flex-col justify-center w-full">
                             <span className="text-gray-100 text-sm tracking-wide uppercase text-left">
