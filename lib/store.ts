@@ -4,11 +4,13 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 import jobsReducer from "./slices/job";
 import recordsReducer from "./slices/records";
+import schedulerReducer from "./slices/scheduler";
 
 export const store = configureStore({
     reducer: {
         jobs: jobsReducer,
         records: recordsReducer,
+        scheduler: schedulerReducer,
     },
     // @ts-ignore
     enhancers: (defaults) => {

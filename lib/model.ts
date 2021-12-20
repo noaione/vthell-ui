@@ -41,3 +41,16 @@ export interface NodeTree {
     loading?: boolean;
     children?: NodeTree[];
 }
+
+export type AutoSchedulerType = "word" | "regex" | "channel" | "group";
+
+interface AutoShcedulerBase {
+    type: AutoSchedulerType;
+    data: string;
+}
+
+export interface AutoScheduler extends AutoShcedulerBase {
+    id: number;
+    chains: AutoShcedulerBase[] | null;
+    enabled: boolean;
+}

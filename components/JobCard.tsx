@@ -83,7 +83,7 @@ export default class JobCard extends React.Component<JobProps> {
                         </Buttons>
                     </div>
                 </BaseContainer>
-                <DeleteModal videoId={job.id} onMounted={(cb) => (this.modalCb = cb)} />
+                <DeleteModal passId={job.id} path="schedule" onMounted={(cb) => (this.modalCb = cb)} />
             </div>
         );
     }
