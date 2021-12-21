@@ -4,6 +4,7 @@ import { AutoScheduler } from "@/lib/model";
 import Buttons from "../Buttons";
 import DeleteModal from "../Modal/DeleteModal";
 import { CallbackModal } from "../Modal/Base";
+import AutoSchedulerEditor from "./Editor";
 
 const mapDispatch = {
     updateScheduler: (payload: AutoScheduler) => ({ type: "scheduler/updateScheduler", payload }),
@@ -52,7 +53,21 @@ class AutoSchedulerCard extends React.Component<PropsFromRedux & ExtraProps, Sta
 
     render() {
         const { scheduler, isAdmin } = this.props;
-        // const { isEditing } = this.state;
+        const { isEditing } = this.state;
+
+        if (isEditing) {
+            return (
+                <div className="flex flex-col w-full bg-gray-700 rounded-md p-3">
+                    <AutoSchedulerEditor
+                        scheduler={scheduler}
+                        onDoneChange={(payload) => {
+                            this.props.updateScheduler(payload);
+                            this.setState({ isEditing: false });
+                        }}
+                    />
+                </div>
+            );
+        }
 
         return (
             <>

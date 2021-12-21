@@ -44,13 +44,13 @@ export interface NodeTree {
 
 export type AutoSchedulerType = "word" | "regex" | "channel" | "group";
 
-interface AutoShcedulerBase {
+export interface AutoSchedulerBase {
     type: AutoSchedulerType;
     data: string;
 }
 
-export interface AutoScheduler extends AutoShcedulerBase {
+export interface AutoScheduler extends AutoSchedulerBase {
     id: number;
-    chains: AutoShcedulerBase[] | null;
+    chains: AutoSchedulerBase[] | null;
     enabled: boolean;
 }
