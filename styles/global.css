@@ -1,0 +1,149 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+
+@import "tailwindcss/utilities";
+
+body {
+    @apply bg-gray-800;
+    @apply text-white;
+}
+
+.nice-shadow {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.body-modal {
+    overflow: hidden;
+}
+
+.-mr-2\/4 {
+    margin-right: -50%;
+}
+
+::-webkit-scrollbar {
+    width: 0;
+    @apply bg-transparent;
+}
+
+.vthell-toast {
+    @apply fixed top-[5.5rem] right-5 z-30 flex flex-col gap-2;
+}
+
+/* fade-transition */
+.fade-in-modal {
+    @apply opacity-100;
+    animation: fadeInModalAni 300ms ease-out 1;
+    transform: scale(1);
+}
+
+@keyframes fadeInModalAni {
+    from {
+        @apply opacity-0;
+        transform: scale(1.1);
+    }
+    to {
+        @apply opacity-100;
+        transform: scale(1);
+    }
+}
+
+.slide-right-enter {
+    animation: enterRight50px 200ms ease-in-out 1;
+    opacity: 0;
+    transform: translateX(50px);
+}
+
+.slide-right-leave {
+    animation: leaveRight50px 200ms ease-in-out 1;
+    opacity: 1;
+    transform: translateX(0px);
+}
+
+@keyframes enterRight50px {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0px);
+    }
+}
+
+@keyframes leaveRight50px {
+    from {
+        opacity: 1;
+        transform: translateX(0px);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+}
+
+.shadow-helper {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    --tw-ring-inset: var(--tw-empty, /*!*/ /*!*/);
+    --tw-ring-offset-width: 0px;
+    --tw-ring-offset-color: #fff;
+    --tw-ring-color: #2563eb;
+    --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width)
+        var(--tw-ring-offset-color);
+    --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+    box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+    border-color: #2563eb;
+}
+
+/**
+ * ==============================================
+ * Dot Flashing
+ * ==============================================
+ */
+.dot-flashing {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    @apply bg-orange-300 text-orange-300;
+    animation: dotFlashing 1s infinite linear alternate;
+    animation-delay: 0.5s;
+}
+
+.dot-flashing::before,
+.dot-flashing::after {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    top: 0;
+}
+
+.dot-flashing::before {
+    left: -15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    @apply bg-orange-300 text-orange-300;
+    animation: dotFlashing 1s infinite alternate;
+    animation-delay: 0s;
+}
+
+.dot-flashing::after {
+    left: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    @apply bg-orange-300 text-orange-300;
+    animation: dotFlashing 1s infinite alternate;
+    animation-delay: 1s;
+}
+
+@keyframes dotFlashing {
+    0% {
+        @apply bg-orange-300;
+    }
+    50%,
+    100% {
+        @apply bg-orange-800;
+    }
+}
