@@ -14,7 +14,8 @@
     "type-check": "tsc --pretty --noEmit",
     "lint": "eslint --ext ts --ext tsx --ext js pages/ lib/ components/",
     "lintfix": "eslint --ext ts --ext tsx --ext js pages/ lib/ components/ --fix",
-    "testall": "npm-run-all lint type-check"
+    "testall": "npm-run-all lint type-check",
+    "hash": "node ./scripts/hash-pass.js"
   },
   "dependencies": {
     "@badrap/bar-of-progress": "^0.1.2",
