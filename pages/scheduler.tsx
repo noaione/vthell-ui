@@ -6,6 +6,7 @@ import { connect, ConnectedProps } from "react-redux";
 import Head from "next/head";
 import MetadataHead from "@/components/MetadataHead";
 import Navbar from "@/components/Navbar";
+import AutoSchedulerAdd from "@/components/AutoScheduler/Add";
 import AutoSchedulerManager from "@/components/AutoScheduler/Manager";
 import ToastManager from "@/components/ToastManager";
 import axios from "axios";
@@ -100,7 +101,7 @@ class AutoSchedulersPage extends React.Component<PropsFromRedux & InferedSSRProp
                     return item;
                 })
             );
-            mergedData = mergedData.sort((a, b) => a.id - b.id);
+            mergedData = mergedData.sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
             return mergedData;
         } catch (err) {
             console.error(err);
@@ -141,7 +142,10 @@ class AutoSchedulersPage extends React.Component<PropsFromRedux & InferedSSRProp
                             <TripleDotLoading />
                         </p>
                     ) : (
-                        <AutoSchedulerManager isAdmin={loggedIn} />
+                        <div className="flex flex-col gap-2">
+                            {loggedIn && <AutoSchedulerAdd />}
+                            <AutoSchedulerManager isAdmin={loggedIn} />
+                        </div>
                     )}
                 </main>
                 <ToastManager duration={5000} />

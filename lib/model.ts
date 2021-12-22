@@ -50,7 +50,7 @@ export interface AutoSchedulerBase {
 }
 
 export interface AutoScheduler extends AutoSchedulerBase {
-    id: number;
+    id?: number;
     chains: AutoSchedulerBase[] | null;
     enabled: boolean;
 }

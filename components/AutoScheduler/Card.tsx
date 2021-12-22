@@ -5,6 +5,7 @@ import Buttons from "../Buttons";
 import DeleteModal from "../Modal/DeleteModal";
 import { CallbackModal } from "../Modal/Base";
 import AutoSchedulerEditor from "./Editor";
+import PatchModal from "../Modal/PatchModal";
 
 const mapDispatch = {
     updateScheduler: (payload: AutoScheduler) => ({ type: "scheduler/updateScheduler", payload }),
@@ -22,50 +23,90 @@ interface ExtraProps {
 
 interface State {
     isEditing: boolean;
+    isSubmit: boolean;
+    schedulerModify: AutoScheduler | null;
 }
 
 class AutoSchedulerCard extends React.Component<PropsFromRedux & ExtraProps, State> {
     deleteModal?: CallbackModal;
+    patchModal?: CallbackModal;
 
     constructor(props) {
         super(props);
-        this.shoeDeleteModal = this.shoeDeleteModal.bind(this);
+        this.showDeleteModal = this.showDeleteModal.bind(this);
         this.onDeleted = this.onDeleted.bind(this);
+        this.onEditorCallback = this.onEditorCallback.bind(this);
+        this.onPatchSuccess = this.onPatchSuccess.bind(this);
 
         this.state = {
             isEditing: false,
+            schedulerModify: null,
+            isSubmit: false,
         };
     }
 
-    shoeDeleteModal() {
+    showDeleteModal() {
         if (this.deleteModal) {
             this.deleteModal.showModal();
         }
     }
 
-    onDeleted() {
+    toast(text: string, mode: string = "default") {
         const event = new CustomEvent("toastNotification", {
-            detail: { text: `Scheduler #${this.props.scheduler.id} has been deleted.`, mode: "info" },
+            detail: { text, mode },
         });
         document.dispatchEvent(event);
-        this.props.removeScheduler(this.props.scheduler.id);
+    }
+
+    onDeleted() {
+        this.toast(`Scheduler #${this.props.scheduler.id} has been deleted.`, "info");
+        if (this.props.scheduler.id) {
+            this.props.removeScheduler(this.props.scheduler.id);
+        }
+    }
+
+    onEditorCallback(payload: any, isCancel?: boolean) {
+        if (isCancel) {
+            this.setState({ isEditing: false });
+            return;
+        }
+        this.setState({ isSubmit: true, schedulerModify: payload }, () => {
+            if (this.patchModal) {
+                this.patchModal.showModal();
+            }
+        });
+    }
+
+    onPatchSuccess(payload: any) {
+        this.props.updateScheduler(payload);
+        this.toast(`Scheduler #${this.props.scheduler.id} has been updated.`, "info");
+        this.setState({ isEditing: false, isSubmit: false });
     }
 
     render() {
         const { scheduler, isAdmin } = this.props;
         const { isEditing } = this.state;
 
+        const scheduleId = (scheduler.id ?? 0).toString();
+
         if (isEditing) {
             return (
-                <div className="flex flex-col w-full bg-gray-700 rounded-md p-3">
-                    <AutoSchedulerEditor
-                        scheduler={scheduler}
-                        onDoneChange={(payload) => {
-                            this.props.updateScheduler(payload);
-                            this.setState({ isEditing: false });
-                        }}
+                <>
+                    <div className="flex flex-col w-full bg-gray-700 rounded-md p-3">
+                        <AutoSchedulerEditor
+                            scheduler={scheduler}
+                            onDoneChange={this.onEditorCallback}
+                            disabled={this.state.isSubmit}
+                        />
+                    </div>
+                    <PatchModal
+                        id={scheduleId}
+                        path="auto-scheduler"
+                        onMounted={(cb) => (this.patchModal = cb)}
+                        onSuccess={this.onPatchSuccess}
+                        payload={this.state.schedulerModify}
                     />
-                </div>
+                </>
             );
         }
 
@@ -104,14 +145,14 @@ class AutoSchedulerCard extends React.Component<PropsFromRedux & ExtraProps, Sta
                             <Buttons btnType="warning" onClick={() => this.setState({ isEditing: true })}>
                                 Edit
                             </Buttons>
-                            <Buttons btnType="danger" onClick={() => this.shoeDeleteModal()}>
+                            <Buttons btnType="danger" onClick={() => this.showDeleteModal()}>
                                 Delete
                             </Buttons>
                         </div>
                     )}
                 </div>
                 <DeleteModal
-                    passId={scheduler.id.toString()}
+                    passId={scheduleId}
                     path="auto-scheduler"
                     onMounted={(cb) => (this.deleteModal = cb)}
                     onDeleteSuccess={() => this.onDeleted()}

@@ -31,6 +31,16 @@ export function mapStatusFormat(status: VTHellJobStatus) {
     }
 }
 
+function TwemojiLockKey() {
+    return (
+        <img
+            className="w-5 h-5 inline-block"
+            src="https://twemoji.maxcdn.com/v/latest/72x72/1f510.png"
+            alt="🔐"
+        />
+    );
+}
+
 interface JobProps {
     job: VTHellJob;
 }
@@ -59,11 +69,19 @@ export default class JobCard extends React.Component<JobProps> {
                         <YoutubeEmbed id={job.id} imageClassName="rounded-t-lg aspect-video" />
                     </div>
                     <div className="px-4 py-4 text-gray-200 bg-gray-700">
-                        <p className="mt-1 uppercase tracking-wide font-bold">
-                            {job.is_member ? "🔐" : ""}
-                            {job.channel_id} • <span className="normal-case">{job.id}</span>
-                            {job.is_member ? " • Members-Only" : ""}
-                        </p>
+                        <div className="mt-1 uppercase tracking-wide font-bold flex flex-col whitespace-prewrap">
+                            <span>
+                                {job.channel_id} • {job.id}
+                            </span>
+                            {job.is_member && (
+                                <>
+                                    <span className="inline-flex flex-row items-center">
+                                        <TwemojiLockKey />
+                                        <span className="ml-1">Members-Only</span>
+                                    </span>
+                                </>
+                            )}
+                        </div>
                         <p className="mt-2 text-white text-lg font-semibold">{job.title}</p>
                         <p className="mt-2 ml-1">
                             <DynamicDateTime unix={job.start_time} />

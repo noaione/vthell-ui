@@ -5,18 +5,19 @@ import Buttons from "../Buttons";
 import Modal, { CallbackModal, ModalProps } from "./Base";
 
 interface ModalProperties extends ModalProps {
-    passId: string;
+    id: string;
+    payload: any;
     path: string;
-    onDeleteSuccess?: () => void;
+    onSuccess?: (payload: any) => void;
+    onFailure?: () => void;
 }
 
-interface DeleteModalState {
+interface PatchModalState {
     passbox: string;
     isSubmit: boolean;
-    force: boolean;
 }
 
-export default class DeleteModal extends React.Component<ModalProperties, DeleteModalState> {
+export default class PatchModal extends React.Component<ModalProperties, PatchModalState> {
     modalCb?: CallbackModal;
 
     constructor(props: ModalProperties) {
@@ -24,12 +25,12 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
         this.handleHide = this.handleHide.bind(this);
         this.handleShow = this.handleShow.bind(this);
         this.toggleModal = this.toggleModal.bind(this);
-        this.callDeleteSuccess = this.callDeleteSuccess.bind(this);
-        this.apiDeleteRequest = this.apiDeleteRequest.bind(this);
+        this.callOnSuccess = this.callOnSuccess.bind(this);
+        this.callOnFailure = this.callOnFailure.bind(this);
+        this.apiPatchRequest = this.apiPatchRequest.bind(this);
         this.state = {
             passbox: "",
             isSubmit: false,
-            force: false,
         };
     }
 
@@ -45,7 +46,7 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
     }
 
     handleHide() {
-        this.setState({ passbox: "", isSubmit: false, force: false });
+        this.setState({ passbox: "", isSubmit: false });
         if (this.modalCb) {
             this.modalCb.hideModal();
         }
@@ -67,14 +68,20 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
         document.dispatchEvent(new CustomEvent("toastNotification", { detail: { text, mode } }));
     }
 
-    callDeleteSuccess() {
-        if (typeof this.props.onDeleteSuccess === "function") {
-            this.props.onDeleteSuccess();
+    callOnSuccess(payload: any) {
+        if (typeof this.props.onSuccess === "function") {
+            this.props.onSuccess(payload);
         }
     }
 
-    async apiDeleteRequest() {
-        const { passId, path } = this.props;
+    callOnFailure() {
+        if (typeof this.props.onFailure === "function") {
+            this.props.onFailure();
+        }
+    }
+
+    async apiPatchRequest() {
+        const { path, payload } = this.props;
         const { passbox } = this.state;
         const { NEXT_PUBLIC_HTTP_URL } = process.env;
         if (isNone(NEXT_PUBLIC_HTTP_URL)) {
@@ -82,45 +89,48 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
             this.handleHide();
             return;
         }
-        console.info(`Deleting request of ${passId}`);
+        console.info(`PATCHing request of ${payload} to /api/${path}/${this.props.id}`);
         this.setState({ isSubmit: true });
 
-        let url = buildPath(NEXT_PUBLIC_HTTP_URL, ["api", path, passId]);
-        if (this.state.force) {
-            url += "?force=1";
-        }
+        const url = buildPath(NEXT_PUBLIC_HTTP_URL, ["api", path, this.props.id]);
 
         const resp = await fetch(url, {
-            method: "DELETE",
+            method: "PATCH",
+            body: JSON.stringify(payload),
             headers: {
                 Authorization: `Password ${passbox}`,
+                "Content-Type": "application/json",
             },
         });
         switch (resp.status) {
             case 200:
                 this.handleHide();
-                this.callDeleteSuccess();
+                this.callOnSuccess(await resp.json());
+                break;
+            case 204:
+                this.handleHide();
+                this.callOnSuccess(payload);
+                break;
+            case 400:
+                this.toast((await resp.json()).error, "error");
+                this.handleHide();
+                this.callOnFailure();
                 break;
             case 401:
                 this.toast("Wrong password!", "error");
                 this.handleHide();
+                this.callOnFailure();
                 break;
             case 403:
-                this.toast("You are not authorized to remove it!", "error");
+                this.toast("You are not authorized to modify it!", "error");
                 this.handleHide();
-                break;
-            case 404:
-                this.toast("The target is missing!", "error");
-                this.handleHide();
-                break;
-            case 406:
-                this.toast("Video status does not allow for deletion!", "error");
-                this.handleHide();
+                this.callOnFailure();
                 break;
             case 500:
                 this.toast("Internal server error!", "error");
                 console.error(resp);
                 this.handleHide();
+                this.callOnFailure();
                 break;
         }
     }
@@ -136,15 +146,15 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
                 onMounted={(callback) => (this.modalCb = callback)}
                 onClose={() => {
                     // Forward the onClose
-                    this.setState({ isSubmit: false, force: false, passbox: "" });
+                    this.setState({ isSubmit: false, passbox: "" });
                     if (typeof onClose === "function") {
                         onClose();
                     }
                 }}
             >
-                <Modal.Head>⚠ Are you sure?</Modal.Head>
+                <Modal.Head>Enter Password</Modal.Head>
                 <Modal.Body>
-                    <span>This will permanently delete the target</span>
+                    <span>This will modify the target you want to VTHell</span>
                     <div className="mt-2">
                         <label className="inline-flex flex-col justify-center w-full">
                             <span className="text-gray-100 text-sm tracking-wide uppercase text-left">
@@ -158,26 +168,18 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
                                 placeholder="**************"
                             />
                         </label>
-                        <label className="inline-flex flex-row items-center justify-center w-full gap-2 mt-3">
-                            <input
-                                type="checkbox"
-                                onChange={(ev) => this.setState({ force: ev.target.checked })}
-                                checked={this.state.force}
-                            />
-                            <span className="text-gray-100 text-sm tracking-wide text-left">
-                                Force deletion
-                            </span>
-                        </label>
                     </div>
                 </Modal.Body>
                 <Modal.Footer className="justify-center gap-2">
-                    <Buttons onClick={() => this.handleHide()}>Cancel</Buttons>
                     <Buttons
-                        onClick={this.apiDeleteRequest}
-                        btnType="danger"
+                        onClick={this.apiPatchRequest}
+                        btnType="primary"
                         disabled={passbox.length < 1 || this.state.isSubmit}
                     >
-                        Delete
+                        Modify
+                    </Buttons>
+                    <Buttons btnType="danger" onClick={() => this.handleHide()}>
+                        Cancel
                     </Buttons>
                 </Modal.Footer>
             </Modal>

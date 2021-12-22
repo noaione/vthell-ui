@@ -14,6 +14,7 @@ import NodeViewer, { countFolderSizesRecurce } from "@/components/Treebeard/View
 import { RootState } from "@/lib/store";
 import DynamicDateTime from "@/components/DynamicDateTime";
 import TreeHeader from "@/components/Treebeard/TreeHeader";
+import { DateTime } from "luxon";
 
 const mapDispatch = {
     resetState: () => ({ type: "records/resetState" }),
@@ -95,6 +96,8 @@ interface RecordPageState {
 
 class RecordedStreamPage extends React.Component<PropsFromRedux, RecordPageState> {
     debounceTimeout?: number;
+    timeoutStart?: NodeJS.Timeout;
+    intervalStart?: NodeJS.Timeout;
 
     constructor(props: PropsFromRedux) {
         super(props);
@@ -149,6 +152,31 @@ class RecordedStreamPage extends React.Component<PropsFromRedux, RecordPageState
 
         this.props.setTree(data);
         this.setState({ lastUpdate, size, isLoading: false });
+
+        const currentTime = DateTime.utc();
+        const nextHour = currentTime.endOf("hour").plus(1);
+        const timeDelta = nextHour.diff(currentTime).as("millisecond");
+        this.timeoutStart = setTimeout(() => {
+            // repeat every 1 hour
+            this.intervalStart = setInterval(async () => {
+                const { data: newData, lastUpdate: newLastUpdate, size: newSize } = await this.fetchData();
+                if (newData === null) {
+                    this.toast("Failed to refresh records data! Contact admin!", "error");
+                    return;
+                }
+                this.props.setTree(newData);
+                this.setState({ lastUpdate: newLastUpdate, size: newSize });
+            }, 3600 * 1000);
+        }, timeDelta);
+    }
+
+    componentWillUnmount() {
+        if (this.intervalStart) {
+            clearInterval(this.intervalStart);
+        }
+        if (this.timeoutStart) {
+            clearTimeout(this.timeoutStart);
+        }
     }
 
     onKeyUpSearch({ target: { value } }: React.ChangeEvent<HTMLInputElement>) {

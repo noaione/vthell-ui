@@ -2,6 +2,7 @@ import React from "react";
 import Router from "next/router";
 import { isNone } from "@/lib/utils";
 import LoginIcon from "./Icons/LoginIcon";
+import PlusIcon from "./Icons/PlusIcon";
 
 interface NavbarProps {
     mode?: "home" | "records" | "create" | "scheduler" | "error" | "login";
@@ -123,7 +124,7 @@ class Navbar extends React.Component<NavbarProps, NavbarState> {
                                 href={createUrl}
                                 className="px-2 lg:px-1 py-2 flex items-center text-xs uppercase font-bold leading-snug text-white hover:opacity-75 transition"
                             >
-                                {/* <PlusIcon className="w-5 h-5" /> */}
+                                <PlusIcon className="w-4 h-4" />
                                 <span className="block lg:hidden">Add new jobs</span>
                             </a>
                             <a

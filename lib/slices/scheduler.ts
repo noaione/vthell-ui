@@ -21,7 +21,8 @@ export const schedulerReducer = createSlice({
             const isExist = scheduler.findIndex((e) => e.id === payload.id) !== -1;
             if (!isExist) {
                 scheduler.push(payload);
-                scheduler = scheduler.sort((a, b) => a.id - b.id);
+                // scheduler = scheduler.sort((a, b) => a.id - b.id);
+                scheduler = scheduler.sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
                 state.scheduler = scheduler;
             }
         },
@@ -29,14 +30,14 @@ export const schedulerReducer = createSlice({
             let { scheduler } = state;
             scheduler = scheduler.concat(action.payload);
             scheduler = scheduler.filter((i, idx) => scheduler.findIndex((op) => op.id === i.id) === idx);
-            scheduler = scheduler.sort((a, b) => a.id - b.id);
+            scheduler = scheduler.sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
             state.scheduler = scheduler;
         },
         removeScheduler: (state, action: PayloadAction<number>) => {
             let { scheduler } = state;
             const { payload } = action;
             scheduler = scheduler.filter((e) => payload !== e.id);
-            scheduler = scheduler.sort((a, b) => a.id - b.id);
+            scheduler = scheduler.sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
             state.scheduler = scheduler;
         },
         updateScheduler: (state, action: PayloadAction<AutoScheduler>) => {
@@ -44,8 +45,15 @@ export const schedulerReducer = createSlice({
             const { payload } = action;
             const idx = scheduler.findIndex((e) => e.id === payload.id);
             if (idx !== -1) {
-                scheduler[idx] = payload;
-                scheduler = scheduler.sort((a, b) => a.id - b.id);
+                const s = scheduler[idx];
+                for (const key in payload) {
+                    if (["id"].includes(key)) {
+                        continue;
+                    }
+                    s[key] = payload[key];
+                }
+                scheduler[idx] = s;
+                scheduler = scheduler.sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
                 state.scheduler = scheduler;
             }
         },
