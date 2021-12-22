@@ -1,5 +1,6 @@
 import BackTopTop from "@/components/BackToTop";
 import BaseContainer from "@/components/BaseContainer";
+import Footer from "@/components/Footer";
 import JobCard, { mapStatusFormat } from "@/components/JobCard";
 import MetadataHead from "@/components/MetadataHead";
 import Navbar from "@/components/Navbar";
@@ -145,7 +146,8 @@ export class VTHellHomepage extends React.Component<PropsFromRedux, State> {
                     )}
                 </main>
                 <ToastManager duration={5000} onMounted={(cb) => (this.toastCb = cb)} />
-                <BackTopTop />
+                <BackTopTop startAt={300} />
+                <Footer />
             </React.Fragment>
         );
     }

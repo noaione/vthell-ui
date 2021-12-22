@@ -15,6 +15,8 @@ import { RootState } from "@/lib/store";
 import DynamicDateTime from "@/components/DynamicDateTime";
 import TreeHeader from "@/components/Treebeard/TreeHeader";
 import { DateTime } from "luxon";
+import Footer from "@/components/Footer";
+import BackTopTop from "@/components/BackToTop";
 
 const mapDispatch = {
     resetState: () => ({ type: "records/resetState" }),
@@ -298,6 +300,8 @@ class RecordedStreamPage extends React.Component<PropsFromRedux, RecordPageState
                         </div>
                     </div>
                 </main>
+                <BackTopTop startAt={300} />
+                <Footer />
             </>
         );
     }

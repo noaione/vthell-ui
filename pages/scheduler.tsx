@@ -11,6 +11,8 @@ import AutoSchedulerManager from "@/components/AutoScheduler/Manager";
 import ToastManager from "@/components/ToastManager";
 import axios from "axios";
 import { buildPath, isNone } from "@/lib/utils";
+import BackTopTop from "@/components/BackToTop";
+import Footer from "@/components/Footer";
 
 export const getServerSideProps = withSessionSSR(async ({ req }) => {
     // @ts-ignore
@@ -149,6 +151,8 @@ class AutoSchedulersPage extends React.Component<PropsFromRedux & InferedSSRProp
                     )}
                 </main>
                 <ToastManager duration={5000} />
+                <BackTopTop startAt={300} />
+                <Footer />
             </>
         );
     }
