@@ -8,6 +8,8 @@ interface ModalProperties extends ModalProps {
     passId: string;
     path: string;
     onDeleteSuccess?: () => void;
+    onFailure?: () => void;
+    onCancel?: () => void;
 }
 
 interface DeleteModalState {
@@ -25,6 +27,7 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
         this.handleShow = this.handleShow.bind(this);
         this.toggleModal = this.toggleModal.bind(this);
         this.callDeleteSuccess = this.callDeleteSuccess.bind(this);
+        this.callFailure = this.callFailure.bind(this);
         this.apiDeleteRequest = this.apiDeleteRequest.bind(this);
         this.state = {
             passbox: "",
@@ -44,10 +47,15 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
         }
     }
 
-    handleHide() {
+    handleHide(callCancel: boolean = false) {
         this.setState({ passbox: "", isSubmit: false, force: false });
         if (this.modalCb) {
             this.modalCb.hideModal();
+        }
+        if (callCancel) {
+            if (typeof this.props.onCancel === "function") {
+                this.props.onCancel();
+            }
         }
     }
 
@@ -70,6 +78,12 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
     callDeleteSuccess() {
         if (typeof this.props.onDeleteSuccess === "function") {
             this.props.onDeleteSuccess();
+        }
+    }
+
+    callFailure() {
+        if (typeof this.props.onFailure === "function") {
+            this.props.onFailure();
         }
     }
 
@@ -104,23 +118,28 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
             case 401:
                 this.toast("Wrong password!", "error");
                 this.handleHide();
+                this.callFailure();
                 break;
             case 403:
                 this.toast("You are not authorized to remove it!", "error");
                 this.handleHide();
+                this.callFailure();
                 break;
             case 404:
                 this.toast("The target is missing!", "error");
                 this.handleHide();
+                this.callFailure();
                 break;
             case 406:
                 this.toast("Video status does not allow for deletion!", "error");
                 this.handleHide();
+                this.callFailure();
                 break;
             case 500:
                 this.toast("Internal server error!", "error");
                 console.error(resp);
                 this.handleHide();
+                this.callFailure();
                 break;
         }
     }
@@ -137,6 +156,9 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
                 onClose={() => {
                     // Forward the onClose
                     this.setState({ isSubmit: false, force: false, passbox: "" });
+                    if (typeof this.props.onCancel === "function") {
+                        this.props.onCancel();
+                    }
                     if (typeof onClose === "function") {
                         onClose();
                     }
@@ -171,7 +193,7 @@ export default class DeleteModal extends React.Component<ModalProperties, Delete
                     </div>
                 </Modal.Body>
                 <Modal.Footer className="justify-center gap-2">
-                    <Buttons onClick={() => this.handleHide()}>Cancel</Buttons>
+                    <Buttons onClick={() => this.handleHide(true)}>Cancel</Buttons>
                     <Buttons
                         onClick={this.apiDeleteRequest}
                         btnType="danger"

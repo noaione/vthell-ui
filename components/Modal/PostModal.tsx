@@ -9,6 +9,7 @@ interface ModalProperties extends ModalProps {
     path: string;
     onSuccess?: (payload: any) => void;
     onFailure?: () => void;
+    onCancel?: () => void;
 }
 
 interface PostModalState {
@@ -44,10 +45,13 @@ export default class PostModal extends React.Component<ModalProperties, PostModa
         }
     }
 
-    handleHide() {
+    handleHide(callCancel: boolean = false) {
         this.setState({ passbox: "", isSubmit: false });
         if (this.modalCb) {
             this.modalCb.hideModal();
+        }
+        if (callCancel && typeof this.props.onCancel === "function") {
+            this.props.onCancel();
         }
     }
 
@@ -148,6 +152,9 @@ export default class PostModal extends React.Component<ModalProperties, PostModa
                 onClose={() => {
                     // Forward the onClose
                     this.setState({ isSubmit: false, passbox: "" });
+                    if (typeof this.props.onCancel === "function") {
+                        this.props.onCancel();
+                    }
                     if (typeof onClose === "function") {
                         onClose();
                     }
@@ -179,7 +186,7 @@ export default class PostModal extends React.Component<ModalProperties, PostModa
                     >
                         Add
                     </Buttons>
-                    <Buttons btnType="danger" onClick={() => this.handleHide()}>
+                    <Buttons btnType="danger" onClick={() => this.handleHide(true)}>
                         Cancel
                     </Buttons>
                 </Modal.Footer>
