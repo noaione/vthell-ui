@@ -90,6 +90,7 @@ class AutoSchedulerAdd extends React.Component<PropsFromRedux, AddState> {
                     onSuccess={this.onSuccess}
                     path="auto-scheduler"
                     onMounted={(cb) => (this.modalCb = cb)}
+                    onCancel={() => this.setState({ isSubmit: false })}
                 />
             </>
         );

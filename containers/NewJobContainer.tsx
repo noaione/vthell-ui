@@ -152,6 +152,7 @@ export default class NewJobContainer extends React.Component<{}, State> {
                     path="schedule"
                     onSuccess={this.onSubmitSuccess}
                     onFailure={() => this.setState({ isSubmit: false })}
+                    onCancel={() => this.setState({ isSubmit: false })}
                 />
             </>
         );
