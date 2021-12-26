@@ -15,7 +15,7 @@ fs.writeFileSync(preactConfig, JSON.stringify(preactPackage, null, 4));
 module.exports = withBundleAnalyzer({
     reactStrictMode: true,
     eslint: {
-        dirs: ["pages", "components", "lib"],
+        dirs: ["pages", "components", "lib", "containers"],
     },
     images: {
         domains: ["i.ytimg.com", "p.ihateani.me", "p.n4o.xyz", "naotimes-og.glitch.me", "ttvthumb.glitch.me"],
