@@ -6,6 +6,7 @@ import DeleteModal from "../Modal/DeleteModal";
 import { CallbackModal } from "../Modal/Base";
 import AutoSchedulerEditor from "./Editor";
 import PatchModal from "../Modal/PatchModal";
+import { isNone } from "@/lib/utils";
 
 const mapDispatch = {
     updateScheduler: (payload: AutoScheduler) => ({ type: "scheduler/updateScheduler", payload }),
@@ -15,6 +16,38 @@ const mapDispatch = {
 const connector = connect(null, mapDispatch);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
+
+function propagateChanges(oldData: AutoScheduler, newData: AutoScheduler | null) {
+    if (isNone(newData)) {
+        return false;
+    }
+    if (oldData.data !== newData.data) {
+        return true;
+    }
+    if (oldData.type !== newData.type) {
+        return true;
+    }
+    if (oldData.enabled !== newData.enabled) {
+        return true;
+    }
+    const oldChains = oldData.chains || [];
+    const newChains = newData.chains || [];
+    if (oldChains.length !== newChains.length) {
+        return true;
+    }
+    // sort by data
+    const sortedOldChains = oldChains.sort();
+    const sortedNewChains = newChains.sort();
+    for (let i = 0; i < sortedOldChains.length; i++) {
+        if (sortedOldChains[i].data !== sortedNewChains[i].data) {
+            return true;
+        }
+        if (sortedOldChains[i].type !== sortedNewChains[i].type) {
+            return true;
+        }
+    }
+    return false;
+}
 
 interface ExtraProps {
     scheduler: AutoScheduler;
@@ -70,6 +103,11 @@ class AutoSchedulerCard extends React.Component<PropsFromRedux & ExtraProps, Sta
             this.setState({ isEditing: false });
             return;
         }
+        const shouldChange = propagateChanges(this.props.scheduler, payload);
+        if (!shouldChange) {
+            this.setState({ isEditing: false, schedulerModify: null });
+            return;
+        }
         this.setState({ isSubmit: true, schedulerModify: payload }, () => {
             if (this.patchModal) {
                 this.patchModal.showModal();
@@ -104,6 +142,8 @@ class AutoSchedulerCard extends React.Component<PropsFromRedux & ExtraProps, Sta
                         path="auto-scheduler"
                         onMounted={(cb) => (this.patchModal = cb)}
                         onSuccess={this.onPatchSuccess}
+                        onFailure={() => this.setState({ isSubmit: false })}
+                        onCancel={() => this.setState({ isSubmit: false })}
                         payload={this.state.schedulerModify}
                     />
                 </>
@@ -156,6 +196,8 @@ class AutoSchedulerCard extends React.Component<PropsFromRedux & ExtraProps, Sta
                     path="auto-scheduler"
                     onMounted={(cb) => (this.deleteModal = cb)}
                     onDeleteSuccess={() => this.onDeleted()}
+                    onFailure={() => this.setState({ isSubmit: false })}
+                    onCancel={() => this.setState({ isSubmit: false })}
                 />
             </>
         );
