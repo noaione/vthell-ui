@@ -26,6 +26,8 @@ export function mapStatusFormat(status: VTHellJobStatus) {
             return "Uploading the recording";
         case "ERROR":
             return "An error occured";
+        case "CANCELLED":
+            return "Job on hold until reloaded";
         default:
             return "Unknown";
     }

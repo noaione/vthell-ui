@@ -14,7 +14,9 @@ export type VTHellJobStatus =
     // Cleanup complete, now done
     | "DONE"
     // Error
-    | "ERROR";
+    | "ERROR"
+    // Cancelled status, same thing as error but it will not be reloaded again
+    | "CANCELLED";
 
 export interface VTHellJob {
     id: string;
