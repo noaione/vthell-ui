@@ -5,6 +5,7 @@ import BaseContainer from "./BaseContainer";
 import YoutubeEmbed from "./YoutubeEmbed";
 import Buttons from "./Buttons";
 import DeleteModal from "./Modal/DeleteModal";
+import PostModal from "./Modal/PostModal";
 import { CallbackModal } from "./Modal/Base";
 import DynamicDateTime from "./DynamicDateTime";
 
@@ -49,6 +50,7 @@ interface JobProps {
 
 export default class JobCard extends React.Component<JobProps> {
     modalCb?: CallbackModal;
+    postModal?: CallbackModal;
 
     constructor(props: JobProps) {
         super(props);
@@ -101,9 +103,29 @@ export default class JobCard extends React.Component<JobProps> {
                         <Buttons btnType="danger" className="mx-1" onClick={() => this.showModal()}>
                             Delete
                         </Buttons>
+                        {["ERROR", "CANCELLED"].includes(job.status) && (
+                            <Buttons
+                                btnType="warning"
+                                className="mx-1"
+                                onClick={() => {
+                                    if (this.postModal) {
+                                        this.postModal.showModal();
+                                    }
+                                }}
+                            >
+                                Reload
+                            </Buttons>
+                        )}
                     </div>
                 </BaseContainer>
                 <DeleteModal passId={job.id} path="schedule" onMounted={(cb) => (this.modalCb = cb)} />
+                {["ERROR", "CANCELLED"].includes(job.status) && (
+                    <PostModal
+                        path="schedule"
+                        onMounted={(cb) => (this.postModal = cb)}
+                        payload={{ id: job.id }}
+                    />
+                )}
             </div>
         );
     }
